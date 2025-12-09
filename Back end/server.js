@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const caseRoutes = require('./routes/caseRoutes.js');
 const session = require("express-session");
 const cors = require("cors");
 const db = require("./models");
@@ -39,5 +40,6 @@ const PORT = process.env.PORT || 5000;
 
 db.sequelize.sync({ alter: true }).then(() => {
   console.log("Database synced");
-  app.listen(PORT, () => console.log("Server running on port " + PORT));
+  app.use("/api/case", caseRoutes);
+app.listen(PORT, () => console.log("Server running on port " + PORT));
 });
