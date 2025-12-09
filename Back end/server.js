@@ -48,9 +48,7 @@ cron.schedule("0 2 * * *", async () => {
   try {
     console.log("Cron job triggering /api/email/send at 2:00 AM ET");
 
-    const response = await axios.post(`${process.env.APP_URL}/api/email/send`, {}, {
-      headers: { Authorization: `Bearer ${process.env.API_TOKEN}` }
-    });
+    const response = await axios.post(`${process.env.APP_URL}/api/email/send`, {});
 
     console.log("Cron response:", response.data);
   } catch (err) {
