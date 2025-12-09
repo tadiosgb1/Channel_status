@@ -1,0 +1,103 @@
+{
+
+
+  "sidebar": {
+    "changeLanguage": "ቋንቋ ቀይር",
+    "exchangeRate": "የገንዘብ መጠን",
+    "beneficiary": "ተቀባይ",
+    "changePin": "ፒን ቀይር",
+    "qrScanner": "ኪው አር ስካነር",
+    "aboutUs": "ስለ እኛ",
+    "logout": "ውጣ",
+    "chooseLanguage": "ቋንቋ ይምረጡ",
+    "exchangeRates": "የገንዘብ መጠኖች"
+  },
+  "exchange": {
+    "currency": "ገንዘብ",
+    "unit": "ክፍል",
+    "buying": "ግዢ",
+    "selling": "ሽያጭ",
+    "traBuying": "ትራ ግዢ",
+    "traSelling": "ትራ ሽያጭ"
+  },
+  
+  "login": "ይግቡ",
+  "wellcome":"እንክን በዳህና መጡ",
+
+
+
+  "changeLanguage": "ቃንቅ ለመቀየር",
+   "exchangeRate": "የምንዛሪ ተመን",
+   "termsAndTariff": "Terms and Tariff",
+   "changePin": "የሚስጥር ቁጥር ይቀይሩ",
+   "logout": "ይውጡ",
+   "aboutUs": "ስለ እኛ",
+   "settings": "Settings",
+
+   "hello":"ጠና ይስጥልኝ",
+   "saving":"ሒሳብ ቁጥር",
+   "balance":"ቀሪ ሒሳብ",
+
+   "transfer":"ማስተላለፍ",
+   "payment":"ክፍያ",
+   "topUp":"የኣየር ሰኣት",
+   "other":"ሌላ",
+
+  
+   "home": "መነሻ ገጽ",
+   "qr": "ኩኣርኮድ",
+   "transactions": "የቅርብ ጊዜ ግብይት",
+   "beneficiaries": "ተጠቃሚ",
+   "next": "ቀጣይ",
+
+   "toWeagenBankAccount": "ወደ ወጋገን ባንክ ሒሳብ",
+   "toOtherBankAccount": "ወደ ሌላ ባንክ ሒሳብ",
+   "toMicroFinance": "ወደ ሚአይክሮ ፋይናንስ",
+   "toWallet": "ወደ ዋሌት",
+
+    "ethiopianAirinesPayment": "የእቲዮጵያ ኣየር መንገድ ክፍያ",
+    "payMerchant": "የግብይት ክፍያ",
+    "schoolPayment": "የት/ቤት ክፍያ",
+
+    "ethioTelecom": "ኢትዮ ቴሌኮም",
+    "safaricom": "ሳፋሪኮም",
+
+
+    "selectAccount":"የሒሳብ ቁጥር ይምረጡ",
+    "beneficiaryAccount":"የተጠቃሚ ሒሳብ ቁጥር",
+    "enterAmount":"መጠኑን ያስገቡ",
+    "paymentReason":"የክፍያ ምክንያት",
+    "addBeneficiary":"ተጠቃሚ ይመዝግቡ",
+    "selectDestinationBank":"Select Destination Bank",
+    "enterAccountNumber": "የሒሳብ ቁጥር ያስገቡ",
+    
+
+
+
+    "toAwash":"ወደ ኣዋሽ",
+
+    "toTelebirrAccount":"ወደ ተሌ ቢር ሒሳብ",
+    "toMpesa":"ወደ ኤምፔሳ",
+
+
+    "pnr":"ፒኤናአር",
+    "pay":"ይክፈሉ",
+
+    "merchant":"ነጋዴ",
+    "agent":"ወኪል",
+    "enterTillNumber":"ቲል ቁጥር ያስገቡ",
+    "or":"ወይም",
+    "schoolMasterId":"የትምህርት ቤት ቢል ኮድ",
+
+
+
+    "forSelf":"ለራስዎ",
+    "forOther":"ለሌላ ግለሰብ",
+    "byAirtime":"የኣየር ሰዓት ይሙሉ",
+    "enterPhoneNumber":"ስልክ ቁጥር ያስገቡ",
+
+    "selectDonation":"ልገሳዉን ይምረጡ",
+    "donation": "ልገሳ",
+    "donate":"ይለግሱ",
+    "remark":"አስተያየት"
+}
