@@ -1,92 +1,97 @@
-import axios from "axios";
+import api from './AxiosInterceptor'
 
-const BASE_URL = "https://gateway.wegagentraining.com";
-
-const apireq = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-const ApiService = {
-  login: async (phone, password) => {
-    try {
-      const res = await apireq.post("/auth/login", { phone, password });
-      return res.data;
-    } catch (err) {
-      console.log(err);
-      if (err.response) return err.response.data;
-      return { description: "Network error", status: false };
-    }
-  },
-
-  refreshToken: async () => {
-    try {
-      const res = await apireq.post("/auth/refresh");
-      return res.data;
-    } catch (err) {
-      console.log(err);
-      if (err.response) return err.response.data;
-      return { description: "Network error", status: false };
-    }
-  },
-
-  logout: async () => {
-    try {
-      const res = await apireq.post("/auth/logout");
-      // if(res.data.status=true){
-      //   this.$router.push('/login');
-      // }\
-      return res.data;
-
-    } catch (err) {
-      console.log(err);
-      if (err.response) return err.response.data;
-      return { description: "Network error", status: false };
-    }
-  },
-
-  post: async (path, payload) => {
-
-    console.log("path,payload",path,payload);
-
-  try {
-    const res = await apireq.post(`/gateway/${path}`, {payload});
-    return res.data;
-  } catch (err) {
-    // First 401 check
-    if (err.status === 401) {
-      // Try refresh
-      const refreshRes = await ApiService.refreshToken();
-
-      console.log("refreshtoken response",refreshRes);
-
-      if (refreshRes && refreshRes.status) {
-        try {
-          // Retry request after refresh
-          const retryRes = await apireq.post(`/gateway/${path}`, payload);
-          return retryRes.data;
-        } catch (retryErr) {
-          if (retryErr.status === 401) {
-            //await ApiService.logout();
-            return { description: "Unauthorized - logged out", status: false };
-          }
-          return retryErr.response?.data || { description: "Request failed", status: false };
-        }
-      } else {
-        // Refresh failed → logout
-        // await ApiService.logout();
-        return { description: "Unauthorized - logged out", status: false };
-      }
-    }
-
-    // Other errors
-    return err.response?.data || { description: "Request failed", status: false };
+class ApiService {
+  constructor() {
+    this.setHeader(localStorage.getItem('access_token'))
   }
-},
 
-};
+  async get(endpoint) {
+    try {
+      const response = await api.get(endpoint)
+      return response.data
+    } catch (error) {
+      return error
+    }
+  }
 
-export default ApiService;
+  async post(endpoint, data) {
+    try {
+      const response = await api.post(endpoint, data)
+      return response.data
+    } catch (error) {
+      console.error(`POST ${endpoint} failed:`, error.response || error.message || error);
+      throw error; // Ensure the error propagates
+    }
+  }
+
+  async patch(endpoint, data) {
+    try {
+      const response = await api.patch(endpoint, data)
+      return response.data
+    } catch (error) {
+      return error
+    }
+  }
+
+  async delete(endpoint) {
+    try {
+      const response = await api.delete(endpoint)
+      return response.data
+    } catch (error) {
+      return error
+    }
+  }
+
+  // Handle custom requests
+  async request(req) {
+    try {
+      const response = await api.request(req)
+      return response.data
+    } catch (error) {
+      error
+    }
+  }
+
+  // Set Authorization Header
+  setHeader(token) {
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    } else {
+      delete api.defaults.headers.common['Authorization']
+    }
+  }
+
+  // Remove Authorization Header
+  removeHeader() {
+    delete api.defaults.headers.common['Authorization']
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('role')
+    localStorage.removeItem('avatar')
+    localStorage.removeItem('name')
+  }
+
+  // // Handle error for any failed requests
+  // handleError(error) {
+  //   console.error('API Error:', error)
+  //   if (error.response) {
+  //     // Server-side error
+  //     if (error.response.status === 401) {
+  //       // Unauthorized, maybe token expired
+  //       console.log('Unauthorized request. Please log in again.')
+  //       this.removeHeader()  // Clear the expired token and redirect to login
+  //       window.location.href = '/login'
+  //     } else {
+  //       // Handle other error statuses
+  //       console.log(`Error ${error.response.status}: ${error.response.data.message || error.message}`)
+  //     }
+  //   } else if (error.request) {
+  //     // No response received
+  //     console.log('No response received from server.')
+  //   } else {
+  //     // Other errors
+  //     console.log('Error', error.message)
+  //   }
+  // }
+}
+
+export default ApiService
