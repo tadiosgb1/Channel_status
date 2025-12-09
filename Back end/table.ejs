@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily Channel Update Table</title>
+    <style>
+      body {
+        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+      }
+      .custom-table {
+        border-collapse: collapse;
+        width: 810px;
+        font-size: 16px;
+      }
+      .header {
+        text-align: center;
+      }
+      td {
+        border: 1px solid #c4c4c5;
+        height: 27px;
+        text-align: center;
+      }
+      th {
+        border: 1px solid #c4c4c5;
+        height: 27px;
+        text-align: center;
+      }
+      .copy-button {
+        margin: 20px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .copy-button:hover {
+        background-color: #0056b3;
+      }
+      .intro-text {
+        text-align: left;
+        width: 65%;
+        font-size: 16px;
+      }
+      .card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 350px;
+        width: 100%;
+        margin: 10px;
+        padding: 20px;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        color: #333;
+      }
+
+      .card ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .card ul li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .card ul li:last-child {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="copy-button" onclick="enterInterval()">
+      Report Interval
+    </button>
+    <button class="copy-button" onclick="copyTable()">Copy Report</button>
+    <div id="report">
+      <div class="intro-text">
+        <p>Dear All,</p>
+        <p>Greetings!</p>
+        <br />
+        <p>Please find the updated status of the channels below.</p>
+        <br />
+        <br />
+      </div>
+      <div>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <td class="header">Channels</td>
+              <td class="header">Total Users Count</td>
+              <td class="header">Operation</td>
+              <td class="header">No. of Trn</td>
+              <td class="header">Amount</td>
+              <td class="header" id="status-header">Status</td>
+              <td class="header">Remark</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="header" rowspan="5">MOBILE APP</td>
+              <td class="header" rowspan="5"><%= data.app_count %></td>
+              <td>To Other Bank</td>
+              <td><%= data.m_to_other_bank_count %></td>
+              <td><%= data.m_to_other_bank_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <!-- <tr>
+              <td>To Other Bank</td>
+              <td><%= data.m_to_other_bank_count %></td>
+              <td><%= data.m_to_other_bank_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr> -->
+            <tr>
+              <!-- <td>TopUp</td> -->
+              <!-- <td><%= data.m_topup_count %></td>
+              <td><%= data.m_topup_sum %></td>
+              <td>UP</td>
+              <td></td> -->
+            </tr>
+            <tr>
+              <td>Tele Birr</td>
+              <td><%= data.m_telebirr_count %></td>
+              <td><%= data.m_telebirr_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Payments</td>
+              <td><%= data.m_payment_count %></td>
+              <td><%= data.m_payment_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>IPS & QR</td>
+              <td><%= data.m_ips_qr_count %></td>
+              <td><%= data.m_ips_qr_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="header" rowspan="4">USSD</td>
+              <td class="header" rowspan="4"><%= data.ussd_count %></td>
+              <td>To Other Bank</td>
+              <td><%= data.u_to_other_bank_count %></td>
+              <td><%= data.u_to_other_bank_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <!-- <tr>
+              <td>To Other Bank</td>
+              <td><%= data.u_to_other_bank_count %></td>
+              <td><%= data.u_to_other_bank_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr> -->
+            <tr>
+              <!-- <td>TopUp</td> -->
+              <!-- <td><%= data.u_topup_count %></td>
+              <td><%= data.u_topup_sum %></td> -->
+              <!-- <td>UP</td> -->
+              <!-- <td></td> -->
+            </tr>
+            <tr>
+              <td>Tele Birr</td>
+              <td><%= data.u_telebirr_count %></td>
+              <td><%= data.u_telebirr_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Payments</td>
+              <td><%= data.u_payment_count %></td>
+              <td><%= data.u_payment_sum %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>USSD + Mobile</td>
+              <td>-</td>
+              <td>Internal Transfer</td>
+              <% function parseNumber(str) { return parseFloat(str.replace(/,/g,
+              '')); } const totalc = parseNumber(data.m_to_wegagen_bank_count) +
+              parseNumber(data.u_to_wegagen_bank_count); %>
+              <td><%= totalc.toLocaleString() %></td>
+              <% function parseNumber(str) { return parseFloat(str.replace(/,/g,
+              '')); } const totals = parseNumber(data.m_to_wegagen_bank_sum) +
+              parseNumber(data.u_to_wegagen_bank_sum); %>
+              <td><%= totals.toLocaleString() %></td>
+              <td>UP</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>INTERNET/OBDX</td>
+              <td colspan="6"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Execution Time</h2>
+      <p><strong>Total:</strong> <%= ExecutionTime %> minute</p>
+      <h3>Individual Execution Time:</h3>
+      <ul>
+        <% for(let key in individualExecutionTime) { %>
+        <li>
+          <%= key.replace(/_/g, " ") %>:
+          <strong><%= individualExecutionTime[key] %> seconds</strong>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+
+    <script>
+      // Check if browser supports Notifications
+      if ("Notification" in window) {
+        // Ask for permission if not already granted
+        if (Notification.permission === "granted") {
+          new Notification("Report Generated!", {
+            body: "You can copy now",
+          });
+        } else if (Notification.permission !== "denied") {
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+              new Notification("Report Generated!", {
+                body: "You can copy now",
+              });
+            }
+          });
+        }
+      } else {
+        alert("Your browser doesn't support system notifications.");
+      }
+      function enterInterval() {
+        let fromTime = prompt("Enter From Time (e.g., 4:00AM)");
+        let toTime = prompt("Enter To Time (e.g., 6:00AM)");
+
+        if (fromTime && toTime) {
+          document.getElementById(
+            "status-header"
+          ).innerText = `Status\n(${fromTime} - ${toTime})`;
+        }
+      }
+      function copyTable() {
+        const table = document.getElementById("report");
+
+        // Create a temporary element to hold the table
+        const tempElement = document.createElement("div");
+        tempElement.innerHTML = table.outerHTML;
+
+        // Append the temporary element to the body (not visible)
+        document.body.appendChild(tempElement);
+
+        // Select the content of the temporary element
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNode(tempElement);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Copy to clipboard
+        try {
+          document.execCommand("copy");
+          alert("Table copied to clipboard!");
+        } catch (err) {
+          console.error("Failed to copy: ", err);
+        }
+
+        // Clean up
+        selection.removeAllRanges();
+        document.body.removeChild(tempElement);
+      }
+    </script>
+  </body>
+</html>
