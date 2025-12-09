@@ -48,28 +48,6 @@ const ApiService = {
     }
   },
 
-  // post: async (path, payload) => {
-  //   let count401=0;
-  //   try {
-  //     const res = await apireq.post(`/gateway/${path}`, { payload });
-  //     return res.data;
-  //   } catch (err) {
-
-  //   if(err.status==401){
-  //    count401++;
-  //    if(count401>=2){
-  //     this.logout();
-  //    }else{
-  //     refreshToken();
-  //     res=await apireq.post(`/gateway/${path}`, { payload });
-  //    }
-  //   }
-  //     console.log("error in hole post",err.status);
-  //     if (err.response) return err.response.data;
-  //     return { description: "Request failed", status: false };
-  //   }
-  // },
-
   post: async (path, payload) => {
 
     console.log("path,payload",path,payload);
