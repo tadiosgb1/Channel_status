@@ -1,12 +1,17 @@
 <template>
   <div class="p-6 bg-gray-100 min-h-screen">
 
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-[#1f3c50]">User Management</h1>
+ <!-- Header Card -->
+    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-primary mb-1 flex items-center">
+          <i class="fa-solid fa-users mr-3"></i>
+          User Management
+        </h1>
+      </div>
       <button
         @click="openModal()"
-        class="flex items-center bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary/80 transition"
+        class="flex items-center bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary/80 transition shadow"
       >
         <i class="fa-solid fa-user-plus mr-2"></i>
         Add User
@@ -14,7 +19,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow-lg">
+    <div class="overflow-x-auto bg-white rounded-xl shadow-sm mt-6">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>

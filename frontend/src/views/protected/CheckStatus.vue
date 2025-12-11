@@ -2,14 +2,24 @@
   <div class="p-6 bg-gray-100 min-h-screen space-y-6">
 
     <!-- Header -->
-    <div>
-      <h1 class="text-3xl font-bold text-[#1f3c50] mb-2">Daily Channel Update</h1>
-      <p class="text-gray-600">Here you can check the updated status of all channels.</p>
-      <p class="text-blue-600 mt-1">Report from: {{ formatDate(report.datecheck) }}</p>
+   <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md mb-6">
+      <h1 class="text-3xl font-extrabold text-primary mb-2">Daily Channel Update</h1>
+      <p class="text-primary font-semibold mt-1">
+        Report from: {{ formatDate(report.datecheck) }}
+      </p>
+    </div>
+
+       <!-- Loading Spinner -->
+    <div v-if="loading" class="flex justify-center items-center h-64">
+      <svg class="animate-spin h-18 w-18 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <span class="ml-2 text-gray-500 font-semibold">Loading Reports...</span>
     </div>
 
     <!-- Channels Table -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow-lg">
+    <div v-if="!loading" class="overflow-x-auto bg-white rounded-xl shadow-lg">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -94,7 +104,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
-
+const loading = ref(true);
 const report = ref({
   datecheck: '',
   app_count: 0,
@@ -133,6 +143,7 @@ const internalTransfer = ref({ count: 0, sum: 0 });
 
 const getReport = async () => {
   try {
+      loading.value = true;
     const res = await api.get("/reports/report");
     report.value = res.data;
 
