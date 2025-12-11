@@ -5,7 +5,7 @@
    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md mb-6">
       <h1 class="text-3xl font-extrabold text-primary mb-2">Daily Channel Update</h1>
       <p class="text-primary font-semibold mt-1">
-        Report from: {{ formatDate(report.datecheck) }}
+        <!-- Report from: {{ formatDate(report.datecheck) }} -->
       </p>
     </div>
 
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Channels Table -->
-    <div v-if="!loading" class="overflow-x-auto bg-white rounded-xl shadow-lg">
+    <div v-else class="overflow-x-auto bg-white rounded-xl shadow-lg">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -143,7 +143,7 @@ const internalTransfer = ref({ count: 0, sum: 0 });
 
 const getReport = async () => {
   try {
-      loading.value = true;
+      loading.value = true  ;
     const res = await api.get("/reports/report");
     report.value = res.data;
 
@@ -166,6 +166,9 @@ const getReport = async () => {
       count: report.value.m_to_wegagen_bank_count + report.value.u_to_wegagen_bank_count,
       sum: report.value.m_to_wegagen_bank_sum + report.value.u_to_wegagen_bank_sum
     };
+    if (loading.value) {
+        loading.value = false;
+    }
 
   } catch (err) {
     console.error("Error fetching report:", err);
