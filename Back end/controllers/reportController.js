@@ -14,7 +14,7 @@ async function connectDatabases() {
     if (!oracleConn) {
       oracleConn = await oracledb.getConnection({
         user: process.env.ORACLE_USER,
-        password: 'Tade#ussdprod1234',
+        password: 'Tesf#ussdgeb1234',
         connectString: process.env.ORACLE_CONN,
       });
     }
@@ -23,8 +23,8 @@ async function connectDatabases() {
       mysqlConn = await mysql.createConnection({
         host: process.env.MYSQL_HOST,
         port: process.env.MYSQL_PORT,
-        user: process.env.MYSQL_USER,
-        password: process.env.MYSQL_PASS,
+        user:process.env.MYSQL_USER,
+        password: 'Tesf#ussdgeb123',
         database: process.env.MYSQL_DB,
       });
     }

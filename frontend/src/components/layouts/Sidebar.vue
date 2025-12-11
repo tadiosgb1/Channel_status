@@ -14,15 +14,7 @@
             Check Status
           </RouterLink>
         </li>
-        <li>
-          <RouterLink
-            :to="{ name: 'cases' }"
-            class="flex items-center p-4 hover:bg-secondary hover:text-white"
-            :class="{ 'bg-primary text-white font-semibold': isActive('cases') }"
-          >
-            Cases
-          </RouterLink>
-        </li>
+        
         <li>
           <RouterLink
             :to="{ name: 'create-users' }"
@@ -32,6 +24,16 @@
             Create Users
           </RouterLink>
         </li>
+        <li>
+          <RouterLink
+            :to="{ name: 'cases' }"
+            class="flex items-center p-4 hover:bg-secondary hover:text-white"
+            :class="{ 'bg-primary text-white font-semibold': isActive('cases') }"
+          >
+            Cases
+          </RouterLink>
+        </li>
+        
       </ul>
     </nav>
   </aside>

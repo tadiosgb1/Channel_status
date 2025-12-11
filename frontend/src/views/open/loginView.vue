@@ -8,15 +8,15 @@
       <h2 class="text-2xl font-bold text-[#1f3c50] mb-2">Welcome Back!</h2>
       <p class="text-sm text-gray-600 mb-6 text-center">Log in to access reports</p>
 
-      <!-- Username Input -->
+      <!-- email Input -->
       <div class="w-full mb-4">
         <label class="flex items-center text-sm font-semibold text-gray-700 mb-1">
-          <i class="fa-solid fa-user mr-2"></i> Username *
+          <i class="fa-solid fa-user mr-2"></i> email *
         </label>
         <input
-          v-model="username"
+          v-model="email"
           type="text"
-          placeholder="Enter your username"
+          placeholder="Enter your email"
           class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
         />
       </div>
@@ -51,40 +51,49 @@
 <script setup>
 import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import ApiService from '@/services/ApiService';
 import Toast from '../../components/reUsableComponents/Toast.vue';
 
-const username = ref('');
+const email = ref('');
 const password = ref('');
 const router = useRouter();
 const { proxy } = getCurrentInstance();
 
+// Create ApiService instance
+const api = new ApiService();
+
 const verifyLogin = async () => {
-  if (!username.value || !password.value) {
-    proxy.$refs.toast.showErrorToastMessage("Username and password are required");
+  if (!email.value || !password.value) {
+    proxy.$refs.toast.showErrorToastMessage("email and password are required");
     return;
   }
 
   const payload = {
-    phone: username.value,
+    email: email.value,
     password: password.value,
   };
 
   try {
-    const res = await axios.post(
-      'https://gateway.wegagentraining.com/auth/login',
-      payload,
-      { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
-    );
+    const res = await api.post('/auth/login', payload);
 
-    if (res.data.status) {
-      localStorage.setItem('userPhone', username.value);
+    if (res) {
+      // Save token
+      localStorage.setItem('access_token', res.access_token);
+      api.setHeader(res.access_token);
+
+      // Save user info
+      localStorage.setItem('useremail', email.value);
+      localStorage.setItem('first_name', res.user?.first_name || '');
+      localStorage.setItem('role', res.user?.role || '');
+      localStorage.setItem('avatar', res.user?.avatar || '');
+
       localStorage.setItem("isAuthenticated", true);
 
       proxy.$refs.toast.showSuccessToastMessage("Login successful!");
+
       router.push('/dashboard');
     } else {
-      proxy.$refs.toast.showErrorToastMessage("Invalid username or password");
+      proxy.$refs.toast.showErrorToastMessage("Invalid email or password");
     }
   } catch (err) {
     console.error(err);

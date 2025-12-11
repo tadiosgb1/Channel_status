@@ -16,6 +16,7 @@ class ApiService {
 
   async post(endpoint, data) {
     try {
+      
       const response = await api.post(endpoint, data)
       return response.data
     } catch (error) {
@@ -70,28 +71,7 @@ class ApiService {
     localStorage.removeItem('name')
   }
 
-  // // Handle error for any failed requests
-  // handleError(error) {
-  //   console.error('API Error:', error)
-  //   if (error.response) {
-  //     // Server-side error
-  //     if (error.response.status === 401) {
-  //       // Unauthorized, maybe token expired
-  //       console.log('Unauthorized request. Please log in again.')
-  //       this.removeHeader()  // Clear the expired token and redirect to login
-  //       window.location.href = '/login'
-  //     } else {
-  //       // Handle other error statuses
-  //       console.log(`Error ${error.response.status}: ${error.response.data.message || error.message}`)
-  //     }
-  //   } else if (error.request) {
-  //     // No response received
-  //     console.log('No response received from server.')
-  //   } else {
-  //     // Other errors
-  //     console.log('Error', error.message)
-  //   }
-  // }
+
 }
 
 export default ApiService
