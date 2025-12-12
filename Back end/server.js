@@ -1,11 +1,12 @@
 require("dotenv").config();
 const express = require("express");
+const cron_local_reportRoutes = require('./routes/cron_local_reportRoutes.js');
 const session = require("express-session");
 const cors = require("cors");
 const db = require("./models");
 const axios = require("axios");
 const cron = require("node-cron");
-
+const Cron_local_report = db.Cron_local_report;
 // Routes
 const caseRoutes = require('./routes/caseRoutes.js');
 const authRoutes = require("./routes/authRoutes");
@@ -40,12 +41,49 @@ const PORT = process.env.PORT || 5000;
 // Sync DB and start server
 db.sequelize.sync({ alter: true }).then(() => {
   console.log("Database synced");
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  app.use("/api/cron_local_report", cron_local_reportRoutes);
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
+
+
+
+cron.schedule("*/2 * * * *", async () => {
+  try {
+    console.log("Cron job triggering /api/reports/report");
+
+    // Fetch the report from your API
+    // const response = await axios.get(`${process.env.APP_URL}/api/reports/report`, {
+    //   headers: { "x-system-key": process.env.SYSTEM_KEY } // if system auth
+    // });
+
+      const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
+      const reportData = response.data; // the full API response
+    // Check if record already exists
+      const existing = await Cron_local_report.findOne();
+
+    if (existing) {
+      // Update existing record
+      await existing.update({ data: reportData });
+      console.log("Report updated successfully at", new Date());
+    } else {
+      // Create new record
+      await Cron_local_report.create({ data: reportData });
+      console.log("Report created successfully at", new Date());
+    }
+
+  } catch (err) {
+    console.error("Cron job failed:", err.message);
+  }
+}, {
+  timezone: "Africa/Addis_Ababa"
+});
+
+
 
 // Cron job: call /api/email/send every day at 2:00 AM ET
 cron.schedule("0 2 * * *", async () => {
   try {
+    
     console.log("Cron job triggering /api/email/send at 2:00 AM ET");
 
     const response = await axios.post(`${process.env.APP_URL}/api/email/send`, {});

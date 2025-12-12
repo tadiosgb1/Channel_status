@@ -5,7 +5,7 @@ const reportController = require("../controllers/reportController");
 const auth = require("../middleware/authMiddleware"); // same middleware
 
 // Views
-router.get("/report", auth, reportController.renderReport);
+router.get("/report", reportController.renderReport);
 router.get("/confirm", auth, reportController.renderConfirm);
 
 // API
