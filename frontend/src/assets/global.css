@@ -1,0 +1,100 @@
+/* src/assets/global.css */
+
+.custom-input {
+  @apply rounded-md w-full h-10 px-4 py-2 mt-2 border border-secondary  shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 ease-in-out bg-gray-50 ;
+}
+
+.custom-input::placeholder {
+  @apply text-gray-500  text-xs;
+}
+
+.custom-input:hover {
+  @apply border-secondary;
+}
+
+.custom-input:focus {
+  @apply bg-territiary border-secondary ring-2 ring-blue-300 transform scale-101 ;
+}
+
+.custom-input-error {
+  @apply rounded-md w-full h-10 px-4 py-2 mt-2 border border-red-500  shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 ease-in-out bg-gray-50 ;
+}
+
+.custom-input-error::placeholder {
+  @apply text-gray-500  text-xs;
+}
+
+.custom-input-error:hover {
+  @apply border-blue-400;
+}
+
+.custom-input-error:focus {
+  @apply bg-blue-100 border-blue-600 ring-2 ring-blue-300 transform scale-101 ;
+}
+
+
+.custom-text-area {
+  @apply rounded-md w-full h-20 px-4 py-2 mt-2 border border-gray-300  shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 ease-in-out bg-gray-50 ;
+}
+
+.custom-text-area::placeholder {
+  @apply text-gray-500  text-xs;
+}
+
+.custom-text-area:hover {
+  @apply border-blue-400;
+}
+
+.custom-text-area:focus {
+  @apply bg-blue-100 border-blue-600  ring-2 ring-blue-300 transform scale-101 ;
+}
+
+  .custom-button {
+    @apply bg-primary hover:scale-105 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ;
+  }
+  .custom-icon {
+    @apply text-white w-5 h-5 mr-2 hover:scale-105;
+  }
+  /* Custom Label Style */
+  .custom-label {
+    @apply block text-sm  text-blue-700 
+  }
+
+  .custom-select {
+    @apply text-xs  rounded-md w-full h-8 px-3 mt-2 border border-gray-300  shadow-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-blue-500 transition-all duration-200 ease-in-out bg-gray-50;
+  }
+  .custom-select::placeholder {
+    @apply text-gray-500  text-xs;
+  }
+  /* Hover Effect */
+  .custom-select:hover {
+    @apply border-blue-400 bg-blue-50;
+  }
+  
+  /* Focus State */
+  .custom-select:focus {
+    @apply bg-white ring-4 ring-blue-300 transform scale-101;
+  }
+  
+  /* Active State */
+  .custom-select:active {
+    @apply border-blue-600 shadow-md;
+  }
+  
+  /* Disabled State */
+  .custom-select:disabled {
+    @apply bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200;
+  }
+
+
+  .custom-star{
+    @apply  text-red-500;
+  }
+  
+  .custom-font {
+    @apply font-sans text-lg font-semibold text-gray-900;
+  }
+
+.custom-icon {
+  @apply text-white w-5 h-5 mr-2 hover:scale-105;
+}
