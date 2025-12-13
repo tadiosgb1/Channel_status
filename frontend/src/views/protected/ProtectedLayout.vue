@@ -8,7 +8,7 @@
     <div class="flex-1 ml-64 p-6">
 
       <!-- Header Card -->
-      <header class="mb-6 flex justify-between items-center bg-white p-6 rounded-2xl shadow-md">
+      <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
           <img
@@ -20,7 +20,7 @@
             <h2 class="text-2xl font-bold text-gray-800">
               Welcome, {{ user?.first_name || 'User' }}
             </h2>
-            <p class="text-gray-500 text-sm capitalize">Role: {{ user?.role || 'Admin' }}</p>
+            <p class="text-gray-500 text-sm capitalize">loged in as: {{ user?.role || 'Admin' }}</p>
           </div>
         </div>
 
