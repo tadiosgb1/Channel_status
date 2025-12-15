@@ -11,13 +11,13 @@
       <!-- email Input -->
       <div class="w-full mb-4">
         <label class="flex items-center text-sm font-semibold text-gray-700 mb-1">
-          <i class="fa-solid fa-user mr-2"></i> email *
+          <i class="fa-solid fa-user mr-2"></i> Email *
         </label>
         <input
           v-model="email"
           type="text"
           placeholder="Enter your email"
-          class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+          class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary custom-input"
         />
       </div>
 
@@ -30,7 +30,7 @@
           v-model="password"
           type="password"
           placeholder="Enter your password"
-          class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+          class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary custom-input"
         />
       </div>
 
@@ -86,8 +86,6 @@ const verifyLogin = async () => {
       localStorage.setItem('first_name', res.user?.first_name || '');
       localStorage.setItem('role', res.user?.role || '');
       localStorage.setItem('avatar', res.user?.avatar || '');
-
-      localStorage.setItem("isAuthenticated", true);
 
       proxy.$refs.toast.showSuccessToastMessage("Login successful!");
 

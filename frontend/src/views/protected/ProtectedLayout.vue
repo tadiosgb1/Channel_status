@@ -18,7 +18,7 @@
           />
           <div>
             <h2 class="text-2xl font-bold text-gray-800">
-              Welcome, {{ user?.first_name || 'User' }}
+          Welcome, {{ user.first_name }}
             </h2>
             <p class="text-gray-500 text-sm capitalize">loged in as: {{ user?.role || 'Admin' }}</p>
           </div>
@@ -85,35 +85,39 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import Sidebar from '@/components/layouts/Sidebar.vue';
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import Sidebar from '@/components/layouts/Sidebar.vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const showModal = ref(false);
-const user = ref({});
+const router = useRouter()
+const showModal = ref(false)
 
-// Load user info from localStorage
+const user = ref({
+  first_name: 'Admin',
+  role: 'Admin',
+  avatar: ''
+})
+
 onMounted(() => {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    user.value = JSON.parse(storedUser);
-  } else {
-    // fallback default
-    user.value = {
-      first_name: 'Admin',
-      role: 'Admin',
-      avatar: ''
-    };
+  const firstName = localStorage.getItem('first_name')
+  const role = localStorage.getItem('role')
+  const avatar = localStorage.getItem('avatar')
+
+  if (firstName) {
+    user.value.first_name = firstName
+    user.value.role = role || 'Admin'
+    user.value.avatar = avatar || ''
   }
-});
+})
 
 const logout = () => {
-  localStorage.removeItem('isAuthenticated');
-  router.push('/login');
-};
+  localStorage.removeItem('isAuthenticated')
+  localStorage.removeItem('first_name')
+  localStorage.removeItem('role')
+  localStorage.removeItem('avatar')
+  router.push('/login')
+}
 </script>
 
 <style>
