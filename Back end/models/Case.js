@@ -1,13 +1,38 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   const Case = sequelize.define("Case", {
-    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-    case_type: { type: Sequelize.STRING },
-    case_title: { type: Sequelize.STRING },
-    description: { type: Sequelize.STRING },
-    status: { type: Sequelize.STRING },
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+
+    case_type: {
+      type: DataTypes.ENUM("mobile_app", "ussd"), // restrict to these two
+      allowNull: false
+    },
+    
+    case_title: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    description: {
+      type: DataTypes.TEXT
+    },
+
+    status: {
+      type: DataTypes.ENUM("pending", "resolved"),
+      defaultValue: "pending",
+      allowNull: false
+    },
+
     user_id: {
-      type: Sequelize.INTEGER,
-      references: { model: "users", key: "id" }
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "users",
+        key: "id"
+      }
     }
   }, {
     tableName: "cases"

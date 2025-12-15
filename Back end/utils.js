@@ -40,8 +40,20 @@ function formatJsonData(data) {
 }
 
 
+async function sendEmails() {
+  try {
+    console.log("Cron job: Sending login links to users...");
 
+    const response = await axios.post(
+      `${process.env.APP_URL}/api/email/send`
+    );
+
+    console.log("Cron result:", response.data);
+  } catch (err) {
+    console.error("Cron error:", err.message);
+  }
+}
 
   
 
-module.exports = {getDate,isConnectionAlive,formatJsonData};
+module.exports = {getDate,isConnectionAlive,formatJsonData,sendEmails};

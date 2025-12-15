@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/CaseController");
-const auth = require("../middleware/authMiddleware"); // same middleware
+const caseController = require("../controllers/caseController");
+const auth = require("../middleware/authMiddleware");
 
-
-router.get("/", auth,controller.getAll);
-router.get("/:id", auth, controller.getOne);
-router.post("/", auth,  controller.create);
-router.put("/:id", auth,  controller.update);
-router.delete("/:id", auth, controller.delete);
+router.get("/", auth, caseController.getAll);
+router.get("/:id", auth, caseController.getOne);
+router.post("/", auth, caseController.create);
+router.patch("/:id", auth, caseController.update);           // partial update
+router.patch("/:id/resolve", auth, caseController.resolve); // mark resolved
+router.delete("/:id", auth, caseController.delete);
 
 module.exports = router;
