@@ -4,7 +4,7 @@
  <!-- Header Card -->
     <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-extrabold text-primary mb-1 flex items-center">
+        <h1 class="text-3xl font-semibold  mb-1 flex items-center">
           <i class="fa-solid fa-users mr-3"></i>
           User Management
         </h1>
@@ -20,40 +20,49 @@
 
     <!-- Users Table -->
     <div class="overflow-x-auto bg-white rounded-xl shadow-sm mt-6">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">First Name</th>
-            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Last Name</th>
-            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Email</th>
-            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase">Role</th>
-            <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4">{{ user.first_name }}</td>
-            <td class="px-6 py-4">{{ user.last_name }}</td>
-            <td class="px-6 py-4">{{ user.email }}</td>
-            <td class="px-6 py-4">
-              <span
-                class="px-2 py-1 rounded-full text-white text-sm font-semibold"
-                :class="user.role === 'Admin' ? 'bg-red-500' : 'bg-green-500'"
-              >
-                {{ user.role }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center space-x-2">
-              <button @click="editUser(user)" class="text-blue-500 hover:text-blue-700">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button @click="deleteUser(user.id)" class="text-red-500 hover:text-red-700">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<table class="min-w-full border border-primary rounded-lg overflow-hidden">
+  <thead class="bg-secondary text-white">
+    <tr>
+      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">First Name</th>
+      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Last Name</th>
+      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Email</th>
+      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Role</th>
+      <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody class="bg-white">
+    <tr
+      v-for="user in users"
+      :key="user.id"
+      class="hover:bg-gray-50 transition"
+    >
+      <td class="px-6 py-4 border border-primary">{{ user.first_name }}</td>
+      <td class="px-6 py-4 border border-primary">{{ user.last_name }}</td>
+      <td class="px-6 py-4 border border-primary">{{ user.email }}</td>
+
+      <td class="px-6 py-4 border border-primary">
+        <span
+          class="px-2 py-1 rounded-full text-white text-sm font-semibold"
+          :class="user.role === 'Admin' ? 'bg-red-500' : 'bg-green-500'"
+        >
+          {{ user.role }}
+        </span>
+      </td>
+
+      <td class="px-6 py-4 text-center space-x-3 border border-primary">
+        <button @click="editUser(user)" class="text-blue-500 hover:text-blue-700">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+
+        <button @click="deleteUser(user.id)" class="text-red-500 hover:text-red-700">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
     </div>
 
     <!-- Add/Edit Modal -->

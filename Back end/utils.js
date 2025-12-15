@@ -39,6 +39,9 @@ function formatJsonData(data) {
   return formattedData;
 }
 
+
+
+
   
 
 module.exports = {getDate,isConnectionAlive,formatJsonData};
