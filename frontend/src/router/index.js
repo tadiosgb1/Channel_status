@@ -16,7 +16,7 @@ const routes = [
   {
     path: "/dashboard",
     component: ProtectedLayout,
-    // meta: { requiresAuth: true },
+    meta: { requiresAuth: true },
     children: [
       { path: "check-status", name: "check-status", component: CheckStatus },
       { path: "cases", name: "cases", component: Cases },

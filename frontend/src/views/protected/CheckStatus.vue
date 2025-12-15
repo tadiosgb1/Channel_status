@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md">
       <h1 class="text-3xl font-semi ">Channel Status Update</h1>
-      <p class="text-primary font-semibold mt-1">
-        Report from: {{ formatDate(report.datecheck) }} to {{ formatDate(getDate) }}
+      <p class=" font-semibold mt-1">
+        Report from: <span class="text-primary">{{ formatDate(report.datecheck) }}</span> <span class="text-green-500">--</span> <span class="text-[#0f3c50]">{{ formatDate(getDate) }}</span>
       </p>
     </div>
 

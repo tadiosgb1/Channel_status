@@ -213,6 +213,7 @@ const closeModal = () => {
   form.value = { id: null, first_name: "", last_name: "", email: "",username:"", password: "", role: "User" };
 };
 
+
 const createUser = async () => {
   try {
     await api.post("/auth/register", form.value);

@@ -93,10 +93,10 @@
 import Sidebar from '@/components/layouts/Sidebar.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import ApiService from "@/services/ApiService";
 const router = useRouter()
 const showModal = ref(false)
-
+const apiService = new ApiService()
 const user = ref({
   first_name: 'Admin',
   role: 'Admin',
@@ -117,7 +117,11 @@ onMounted(() => {
 })
 
 // Logout function
-const logout = () => {
+const logout = async () => {
+ await apiService.post('/auth/logout').catch(() => {
+    // Ignore errors on logout
+  })
+
   localStorage.removeItem('isAuthenticated')
   localStorage.removeItem('first_name')
   localStorage.removeItem('role')
