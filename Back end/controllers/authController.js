@@ -1,12 +1,12 @@
 const bcrypt = require("bcrypt");
 const { User } = require("../models");
 const { Op } = require("sequelize");
-
+const { sendRegistrationEmail } = require("../utils/email"); // create this helper
 module.exports = {
   // ======================
   // REGISTER
   // ======================
-  register: async (req, res) => {
+   register: async (req, res) => {
     try {
       const { first_name, last_name, username, email, password, role } = req.body;
 
@@ -21,12 +21,22 @@ module.exports = {
         role
       });
 
-      // Remove password before sending response
+      // Send email with username and password
+      // if (email) {
+      //   await sendRegistrationEmail(email, username, password);
+      // }
+
+      // // Remove password before sending response
+      // const userResponse = user.toJSON();
+      // delete userResponse.password;
+
+      // res.json({ message: "Registered successfully, email sent", user: userResponse });
       const userResponse = user.toJSON();
       delete userResponse.password;
-
-      res.json({ message: "Registered", user: userResponse });
+       res.json({ message: "Registered successfully", user: userResponse });
     } catch (err) {
+      console.log("error",err
+      );
       res.status(500).json({ error: err.message });
     }
   },

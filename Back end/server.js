@@ -39,7 +39,7 @@ app.use("/api/email", emailRoutes);
 const PORT = process.env.PORT || 5000;
 
 // Sync DB and start server
-db.sequelize.sync().then(() => {
+db.sequelize.sync({ alter: true }).then(() => {
   console.log("Database synced");
   app.use("/api/cron_local_report", cron_local_reportRoutes);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
@@ -81,18 +81,13 @@ cron.schedule("*/2 * * * *", async () => {
 
 
 // Cron job: call /api/email/send every day at 2:00 AM ET
-cron.schedule("0 */2 * * *", async () => {
+cron.schedule("0 2 * * *", async () => {
   try {
-    console.log("Cron job: Sending login links to users...");
-
-    const response = await axios.post(
-      `${process.env.APP_URL}/api/email/send`
-    );
-
-    console.log("Cron result:", response.data);
-
+    console.log("Cron job triggering /api/email/send at 2:00 AM ET");
+    const response = await axios.post(`${process.env.APP_URL}/api/email/send`, {});
+    console.log("Cron response:", response.data);
   } catch (err) {
-    console.error("Cron error:", err.message);
+    console.error("Cron job failed:", err.message);
   }
 }, {
   timezone: "Africa/Addis_Ababa"
