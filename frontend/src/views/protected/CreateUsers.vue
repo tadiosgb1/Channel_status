@@ -74,34 +74,32 @@
           ✖
         </button>
 
-        <h2 class="text-xl font-bold text-center text-[#1f3c50] mb-4 bg-primary/20 p-3 rounded-lg">
+        <h2 class="text-xl font-bold text-center text-[#1f3c50] mb-4">
           {{ isEditing ? 'Edit User' : 'Create New User' }}
         </h2>
 
         <form @submit.prevent="isEditing ? updateUser() : createUser()">
 
-         <div class="flex">
-            <div class="w-1/2 mr-2">
-              <label class="text-sm font-semibold text-gray-700 mb-1 block">First Name *</label>
-              <input
-                v-model="form.first_name"
-                type="text"
-                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-                placeholder="Enter first name"
-                required
-              />
-            </div>
+          <div class="mb-3">
+            <label class="text-sm font-semibold text-gray-700 mb-1 block">First Name *</label>
+            <input
+              v-model="form.first_name"
+              type="text"
+              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary"
+              placeholder="Enter first name"
+              required
+            />
+          </div>
 
-            <div class="w-1/2 ml-2">
-              <label class="text-sm font-semibold text-gray-700 mb-1 block">Last Name *</label>
-              <input
-                v-model="form.last_name"
-                type="text"
-                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-                placeholder="Enter last name"
-                required
-              />
-            </div>
+          <div class="mb-3">
+            <label class="text-sm font-semibold text-gray-700 mb-1 block">Last Name *</label>
+            <input
+              v-model="form.last_name"
+              type="text"
+              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
+              placeholder="Enter last name"
+              required
+            />
           </div>
 
           <div class="mb-3">
