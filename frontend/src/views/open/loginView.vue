@@ -8,15 +8,15 @@
       <h2 class="text-2xl font-bold text-[#1f3c50] mb-2">Welcome Back!</h2>
       <p class="text-sm text-gray-600 mb-6 text-center">Log in to access reports</p>
 
-      <!-- email Input -->
+      <!-- username Input -->
       <div class="w-full mb-4">
         <label class="flex items-center text-sm font-semibold text-gray-700 mb-1">
-          <i class="fa-solid fa-user mr-2"></i> email *
+          <i class="fa-solid fa-user mr-2"></i> username *
         </label>
         <input
-          v-model="email"
+          v-model="username"
           type="text"
-          placeholder="Enter your email"
+          placeholder="Enter your username"
           class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
         />
       </div>
@@ -54,7 +54,7 @@ import { useRouter } from 'vue-router';
 import ApiService from '@/services/ApiService';
 import Toast from '../../components/reUsableComponents/Toast.vue';
 
-const email = ref('');
+const username = ref('');
 const password = ref('');
 const router = useRouter();
 const { proxy } = getCurrentInstance();
@@ -63,13 +63,13 @@ const { proxy } = getCurrentInstance();
 const api = new ApiService();
 
 const verifyLogin = async () => {
-  if (!email.value || !password.value) {
-    proxy.$refs.toast.showErrorToastMessage("email and password are required");
+  if (!username.value || !password.value) {
+    proxy.$refs.toast.showErrorToastMessage("username and password are required");
     return;
   }
 
   const payload = {
-    email: email.value,
+    username: username.value,
     password: password.value,
   };
 
@@ -82,7 +82,7 @@ const verifyLogin = async () => {
       api.setHeader(res.access_token);
 
       // Save user info
-      localStorage.setItem('useremail', email.value);
+      localStorage.setItem('username', username.value);
       localStorage.setItem('first_name', res.user?.first_name || '');
       localStorage.setItem('role', res.user?.role || '');
       localStorage.setItem('avatar', res.user?.avatar || '');
@@ -93,7 +93,7 @@ const verifyLogin = async () => {
 
       router.push('/dashboard');
     } else {
-      proxy.$refs.toast.showErrorToastMessage("Invalid email or password");
+      proxy.$refs.toast.showErrorToastMessage("Invalid username or password");
     }
   } catch (err) {
     console.error(err);

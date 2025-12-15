@@ -112,7 +112,16 @@
               required
             />
           </div>
-
+<div class="mb-3">
+            <label class="text-sm font-semibold text-gray-700 mb-1 block">Username *</label>
+            <input
+              v-model="form.username"
+              type="username"
+              class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
+              placeholder="Enter username "
+              required
+            />
+          </div>
           <div class="mb-3" v-if="!isEditing">
             <label class="text-sm font-semibold text-gray-700 mb-1 block">Password *</label>
             <input
@@ -166,6 +175,7 @@ const form = ref({
   first_name: "",
   last_name: "",
   email: "",
+  username:"",
   password: "",
   role: "User",
 });
@@ -177,7 +187,7 @@ const openModal = () => {
 
 const closeModal = () => {
   showModal.value = false;
-  form.value = { id: null, first_name: "", last_name: "", email: "", password: "", role: "User" };
+  form.value = { id: null, first_name: "", last_name: "", email: "",username:"", password: "", role: "User" };
 };
 
 const createUser = async () => {
