@@ -3,7 +3,7 @@
 
     <!-- Header Card -->
     <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
-      <h1 class="text-3xl font-semibold  flex items-center">
+      <h1 class="text-xl font-semibold  flex items-center">
         <i class="fa-solid fa-briefcase mr-3"></i>
         Case Management
       </h1>
@@ -17,8 +17,8 @@
       </button>
     </div>
 
-    <!-- Cases Table -->
-<div class="overflow-x-auto bg-white rounded-xl shadow-sm mt-6">
+
+<div class="overflow-hidden rounded-xl border border-primary mt-6 bg-white shadow-sm" v-if="cases.length > 0">
   <table class="min-w-full border border-primary rounded-lg overflow-hidden">
     <thead class="bg-secondary text-white">
       <tr>
@@ -34,9 +34,13 @@
         <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">
           User
         </th>
+        <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Created At</th>
+        <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">updated At</th>
+
         <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">
           Status
         </th>
+
         <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">
           Actions
         </th>
@@ -66,12 +70,21 @@
         </td>
 
         <td class="px-6 py-4 border border-primary">
+          {{ formatDate(caseItem.createdAt) }}
+        </td>
+        <td v-if="caseItem.status==='resolved'" class="px-6 py-4 border border-primary">
+          {{ formatDate(caseItem.updatedAt) }}
+        </td>
+        <td v-else class="px-6 py-4 border border-primary">
+          ---   
+        </td>
+        
+        <td class="px-6 py-4 border border-primary">
           <span
             class="px-2 py-1 rounded-full text-white text-sm font-semibold"
             :class="{
-              'bg-green-600': caseItem.status === 'Open',
-              'bg-red-600': caseItem.status === 'Closed',
-              'bg-yellow-500': caseItem.status === 'Pending'
+              'bg-primary': caseItem.status === 'pending',
+              'bg-green-600': caseItem.status === 'resolved',
             }"
           >
             {{ caseItem.status }}
@@ -97,6 +110,11 @@
     </tbody>
   </table>
 </div>
+    <!-- No Cases Message -->
+    <div v-else class="text-center text-gray-500 mt-12">
+      <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
+      <p class="text-lg">No cases found. Please add a new case.</p> 
+    </div>
 
 
     <!-- Add/Edit Modal -->
@@ -114,6 +132,18 @@
 
         <form @submit.prevent="isEditing ? updateCase() : createCase()">
 
+
+              <div class="mb-3">
+  
+            <select v-model="form.case_type"
+             class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary">
+              <option value="ussd">USSD</option>
+              <option value="Mobile">Mobile App</option>
+  
+            </select>
+           
+          </div>
+
           <div class="mb-3">
             <label class="text-sm font-semibold text-gray-700 mb-1 block">Case Title *</label>
             <input
@@ -123,15 +153,7 @@
             />
           </div>
 
-          <div class="mb-3">
-  
-            <select v-model="form.case_type" class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" required>
-              <option value="ussd">USSD</option>
-              <option value="Mobile">Mobile App</option>
-  
-            </select>
-           
-          </div>
+      
 
           <div class="mb-3">
             <label class="text-sm font-semibold text-gray-700 mb-1 block">Description *</label>
@@ -149,22 +171,8 @@
               v-model="form.status"
               class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
             >
-              <option value="Open">Open</option>
               <option value="Pending">Pending</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
-
-          <div class="mb-4">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">User *</label>
-            <select
-              v-model="form.user_id"
-              class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
-              required
-            >
-              <option v-for="u in users" :value="u.id" :key="u.id">
-                {{ u.first_name }} {{ u.last_name }}
-              </option>
+              <option value="Resolved">Resolved</option>
             </select>
           </div>
 
@@ -190,18 +198,16 @@ const api = new ApiService();
 const { proxy } = getCurrentInstance();
 
 const cases = ref([]);
-const users = ref([]);
 
 const showModal = ref(false);
 const isEditing = ref(false);
 
 const form = ref({
   id: null,
-  case_type: "",
+  case_type: "USSD",
   case_title: "",
   description: "",
-  status: "Open",
-  user_id: null,
+  status: "Pending",
 });
 
 // Open modal
@@ -215,11 +221,11 @@ const closeModal = () => {
   showModal.value = false;
   form.value = {
     id: null,
-    case_type: "",
+    case_type: "USSD",
     case_title: "",
     description: "",
-    status: "Open",
-    user_id: null,
+    status: "Pending",
+
   };
 };
 
@@ -241,6 +247,19 @@ const editCase = (caseItem) => {
   form.value = { ...caseItem };
   isEditing.value = true;
   showModal.value = true;
+};
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false // use 24-hour format; set to true for AM/PM
+  };
+  return date.toLocaleString(undefined, options);
 };
 
 // UPDATE
@@ -277,13 +296,8 @@ const getCases = async () => {
 };
 
 // FETCH USERS (for dropdown)
-const getUsers = async () => {
-  const res = await api.get("/users");
-  users.value = res.data;
-};
 
 onMounted(() => {
   getCases();
-  getUsers();
 });
 </script>

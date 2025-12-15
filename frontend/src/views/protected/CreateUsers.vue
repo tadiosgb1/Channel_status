@@ -4,7 +4,7 @@
  <!-- Header Card -->
     <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-semibold  mb-1 flex items-center">
+        <h1 class="text-xl font-semibold   flex items-center">
           <i class="fa-solid fa-users mr-3"></i>
           User Management
         </h1>
@@ -19,49 +19,71 @@
     </div>
 
     <!-- Users Table -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow-sm mt-6">
-<table class="min-w-full border border-primary rounded-lg overflow-hidden">
-  <thead class="bg-secondary text-white">
-    <tr>
-      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">First Name</th>
-      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Last Name</th>
-      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Email</th>
-      <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Role</th>
-      <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">Actions</th>
-    </tr>
-  </thead>
+    <div class="overflow-hidden rounded-xl border border-primary mt-6 bg-white shadow-sm">
+    <table class="min-w-full border border-primary rounded-lg overflow-hidden">
+      <thead class="bg-secondary text-white">
+        <tr class="border border-primary">
+          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">First Name</th>
+          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Last Name</th>
+          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Email</th>
+          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Username</th>
+          <th class="px-2 py-3 text-left text-sm font-medium uppercase border border-primary">Role</th>
+          <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">Actions</th>
+        </tr>
+      </thead>
 
-  <tbody class="bg-white">
-    <tr
-      v-for="user in users"
-      :key="user.id"
-      class="hover:bg-gray-50 transition"
-    >
-      <td class="px-6 py-4 border border-primary">{{ user.first_name }}</td>
-      <td class="px-6 py-4 border border-primary">{{ user.last_name }}</td>
-      <td class="px-6 py-4 border border-primary">{{ user.email }}</td>
-
-      <td class="px-6 py-4 border border-primary">
-        <span
-          class="px-2 py-1 rounded-full text-white text-sm font-semibold"
-          :class="user.role === 'Admin' ? 'bg-red-500' : 'bg-green-500'"
+      <tbody class="bg-white border border-primary">
+        <tr 
+          v-for="user in users"
+          :key="user.id"
+          class="hover:bg-gray-50 transition "
         >
-          {{ user.role }}
-        </span>
-      </td>
+          <td class="px-6 py-4 border border-primary">{{ user.first_name }}</td>
+          <td class="px-6 py-4 border border-primary">{{ user.last_name }}</td>
+          <td class="px-6 py-4 border border-primary">{{ user.email }}</td>
+          <td class="px-6 py-4 border border-primary">{{ user.username }}</td>
 
-      <td class="px-6 py-4 text-center space-x-3 border border-primary">
-        <button @click="editUser(user)" class="text-blue-500 hover:text-blue-700">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </button>
+          <td class="px-6 py-4 border border-primary">
+            <span
+              class="px-1 py-1 rounded-full text-white text-sm font-semibold"
+              :class="user.role === 'Admin' ? 'bg-[#0f3c50]' : 'bg-[#0f3c50]'"
+            >
+              {{ user.role }}
+            </span>
+          </td>
 
-        <button @click="deleteUser(user.id)" class="text-red-500 hover:text-red-700">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+          <td class="px-6 py-4 text-center space-x-3 border border-primary">
+          <button @click="editUser(user)" class="text-blue-500 hover:text-blue-700">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+
+          <button @click="deleteUser(user.id)" class="text-red-500 hover:text-red-700">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+
+          <button
+          v-if="user.status === 'Active'"
+              @click="deactivateUser(user.id)"
+              class="text-orange-600 hover:text-orange-800 font-semibold"
+            >
+              <i class="fa-solid fa-user-slash mr-1"></i>
+              Deactivate
+            </button>
+
+            <button
+              v-else
+              @click="activateUser(user.id)"
+              class="text-green-600 hover:text-green-800 font-semibold"
+            >
+              <i class="fa-solid fa-user-check mr-1"></i>
+              Activate
+            </button>
+        </td>
+
+
+        </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -79,31 +101,32 @@
         </h2>
 
         <form @submit.prevent="isEditing ? updateUser() : createUser()">
+          <div class="flex justify-between">
+            <div class="mb-3 w-1/2 mr-2">
+              <label class="text-sm font-semibold text-gray-700  block">First Name *</label>
+              <input
+                v-model="form.first_name"
+                type="text"
+                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
+                placeholder="Enter first name"
+                required
+              />
+            </div>
 
-          <div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">First Name *</label>
-            <input
-              v-model="form.first_name"
-              type="text"
-              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary"
-              placeholder="Enter first name"
-              required
-            />
+            <div class="mb-3 w-1/2 ml-2">
+              <label class="text-sm font-semibold text-gray-700  block">Last Name *</label>
+              <input
+                v-model="form.last_name"
+                type="text"
+                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
+                placeholder="Enter last name"
+                required
+              />
+            </div>
           </div>
 
           <div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">Last Name *</label>
-            <input
-              v-model="form.last_name"
-              type="text"
-              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-              placeholder="Enter last name"
-              required
-            />
-          </div>
-
-          <div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block  ">Email *</label>
+            <label class="text-sm font-semibold text-gray-700  block  ">Email *</label>
             <input
               v-model="form.email"
               type="email"
@@ -112,18 +135,18 @@
               required
             />
           </div>
-<div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">Username *</label>
+          <div class="mb-3">
+            <label class="text-sm font-semibold text-gray-700  block">Username *</label>
             <input
               v-model="form.username"
               type="username"
-              class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
+              class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary custom-input"
               placeholder="Enter username "
               required
             />
           </div>
           <div class="mb-3" v-if="!isEditing">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">Password *</label>
+            <label class="text-sm font-semibold text-gray-700  block">Password *</label>
             <input
               v-model="form.password"
               type="password"
@@ -134,7 +157,7 @@
           </div>
 
           <div class="mb-4">
-            <label class="text-sm font-semibold text-gray-700 mb-1 block">Role *</label>
+            <label class="text-sm font-semibold text-gray-700  block">Role *</label>
             <select
               v-model="form.role"
               class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
@@ -210,7 +233,7 @@ const editUser = (user) => {
 
 const updateUser = async () => {
   try {
-    await api.put(`/users/${form.value.id}`, form.value);
+    await api.patch(`/users/${form.value.id}`, form.value);
     proxy.$refs.toast.showSuccessToastMessage("User updated!");
     getAllUsers();
     closeModal();
@@ -232,6 +255,33 @@ const deleteUser = async (id) => {
     }
   }
 };
+
+const deactivateUser = async (id) => {
+  if (!confirm("Deactivate this user?")) return;
+
+  try {
+    await api.patch(`/users/${id}/deactivate`);
+    proxy.$refs.toast.showSuccessToastMessage("User deactivated!");
+    getAllUsers();
+  } catch (err) {
+    console.error(err);
+    proxy.$refs.toast.showErrorToastMessage("Failed to deactivate user");
+  }
+};
+
+const activateUser = async (id) => {
+  if (!confirm("Activate this user?")) return;
+
+  try {
+    await api.patch(`/users/${id}/activate`);
+    proxy.$refs.toast.showSuccessToastMessage("User activated!");
+    getAllUsers();
+  } catch (err) {
+    console.error(err);
+    proxy.$refs.toast.showErrorToastMessage("Failed to activate user");
+  }
+};
+
 
 const getAllUsers = async () => {
   try {

@@ -2,10 +2,13 @@
   <div class="flex min-h-screen bg-gray-100">
 
     <!-- Sidebar -->
-    <Sidebar />
+    <Sidebar /> <!-- This is the togglable sidebar we created -->
 
     <!-- Main content -->
-    <div class="flex-1 ml-64 p-6">
+    <div class="flex-1 lg:ml-64">
+
+      <!-- Mobile Top Bar Spacer -->
+      <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
       <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
@@ -18,9 +21,9 @@
           />
           <div>
             <h2 class="text-2xl font-bold text-gray-800">
-          Welcome, {{ user.first_name }}
+              Welcome, {{ user.first_name }}
             </h2>
-            <p class="text-gray-500 text-sm capitalize">loged in as: {{ user?.role || 'Admin' }}</p>
+            <p class="text-gray-500 text-sm capitalize">Logged in as: {{ user?.role || 'Admin' }}</p>
           </div>
         </div>
 
@@ -35,7 +38,7 @@
       </header>
 
       <!-- Nested Routes -->
-      <main>
+      <main class="p-6">
         <router-view />
       </main>
 
@@ -85,6 +88,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import Sidebar from '@/components/layouts/Sidebar.vue'
 import { ref, onMounted } from 'vue'
@@ -99,6 +103,7 @@ const user = ref({
   avatar: ''
 })
 
+// Load user info from localStorage
 onMounted(() => {
   const firstName = localStorage.getItem('first_name')
   const role = localStorage.getItem('role')
@@ -111,6 +116,7 @@ onMounted(() => {
   }
 })
 
+// Logout function
 const logout = () => {
   localStorage.removeItem('isAuthenticated')
   localStorage.removeItem('first_name')
@@ -119,8 +125,3 @@ const logout = () => {
   router.push('/login')
 }
 </script>
-
-<style>
-/* Tailwind CSS primary color example (adjust in tailwind.config.js) */
-
-</style>

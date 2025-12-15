@@ -27,7 +27,7 @@
           <i class="fa-solid fa-lock mr-2"></i> Password *
         </label>
         <input
-          v-model="password"
+          v-model="password" 
           type="password"
           placeholder="Enter your password"
           class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
