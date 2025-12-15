@@ -82,6 +82,7 @@ cron.schedule("*/2 * * * *", async () => {
 
 
 
+
 //Monday–Thursday:02:00, 04:00, 06:00, 08:00, 10:00
 cron.schedule("0 2,4,6,8,10 * * 1-4", sendEmails, {
   timezone: "Africa/Addis_Ababa"
@@ -97,6 +98,7 @@ cron.schedule("30 5 * * 5", sendEmails, {
   timezone: "Africa/Addis_Ababa"
 });
 
+  //saturday
 cron.schedule("0 2,4,6 * * 6", sendEmails, {
   timezone: "Africa/Addis_Ababa"
 });

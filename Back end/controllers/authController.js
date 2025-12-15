@@ -21,18 +21,17 @@ module.exports = {
         role
       });
 
-      // Send email with username and password
-      // if (email) {
-      //   await sendRegistrationEmail(email, username, password);
-      // }
+     // Send email with username and password
+      if (email) {
+        await sendRegistrationEmail(email, username, password);
+      }
 
-      // // Remove password before sending response
-      // const userResponse = user.toJSON();
-      // delete userResponse.password;
-
-      // res.json({ message: "Registered successfully, email sent", user: userResponse });
+      // Remove password before sending response
       const userResponse = user.toJSON();
       delete userResponse.password;
+
+      res.json({ message: "Registered successfully, email sent", user: userResponse });
+      
        res.json({ message: "Registered successfully", user: userResponse });
     } catch (err) {
       console.log("error",err
