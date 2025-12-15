@@ -7,10 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     },
 
     case_type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("mobile_app", "ussd"), // restrict to these two
       allowNull: false
     },
-
+    
     case_title: {
       type: DataTypes.STRING,
       allowNull: false
