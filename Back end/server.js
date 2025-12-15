@@ -6,6 +6,7 @@ const cors = require("cors");
 const db = require("./models");
 const axios = require("axios");
 const cron = require("node-cron");
+const {sendEmails} = require("./utils.js")
 const Cron_local_report = db.Cron_local_report;
 // Routes
 const caseRoutes = require('./routes/caseRoutes.js');
@@ -81,19 +82,38 @@ cron.schedule("*/2 * * * *", async () => {
 
 
 // Cron job: call /api/email/send every day at 2:00 AM ET
-cron.schedule("0 */2 * * *", async () => {
-  try {
-    console.log("Cron job: Sending login links to users...");
+// cron.schedule("*/2 * * * *", async () => {
+//   try {
+//     console.log("Cron job: Sending login links to users...");
 
-    const response = await axios.post(
-      `${process.env.APP_URL}/api/email/send`
-    );
+//     const response = await axios.post(
+//       `${process.env.APP_URL}/api/email/send`
+//     );
 
-    console.log("Cron result:", response.data);
+//     console.log("Cron result:", response.data);
 
-  } catch (err) {
-    console.error("Cron error:", err.message);
-  }
-}, {
+//   } catch (err) {
+//     console.error("Cron error:", err.message);
+//   }
+// }, {
+//   timezone: "Africa/Addis_Ababa"
+// });
+
+//Monday–Thursday:02:00, 04:00, 06:00, 08:00, 10:00
+cron.schedule("0 2,4,6,8,10 * * 1-4", sendEmails, {
+  timezone: "Africa/Addis_Ababa"
+});
+
+// Friday: 02:00, 04:00, 08:00, 10:00
+cron.schedule("0 2,4,8,10 * * 5", sendEmails, {
+  timezone: "Africa/Addis_Ababa"
+});
+
+// Friday: 05:30
+cron.schedule("30 5 * * 5", sendEmails, {
+  timezone: "Africa/Addis_Ababa"
+});
+
+cron.schedule("0 2,4,6 * * 6", sendEmails, {
   timezone: "Africa/Addis_Ababa"
 });
