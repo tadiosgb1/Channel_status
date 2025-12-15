@@ -65,17 +65,29 @@ module.exports = {
     }
   },
 
-  async create(req, res) {
-    try {
-      const body = { ...req.body };
-      
-      const data = await Case.create(body);
-      res.json(data);
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  },
+async create(req, res) {
+  try {
+    const body = { ...req.body };
 
+    // Get user ID from session
+    const userId = req.session.userId;
+    console.log("userId",userId);
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Attach user ID to the case
+    const data = await Case.create({
+      ...body,
+      user_id: userId
+    });
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+,
   async update(req, res) {
     try {
       const body = { ...req.body };
