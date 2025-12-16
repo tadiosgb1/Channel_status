@@ -18,8 +18,7 @@ function GenerateQuery(date, check = false) {
     datecheck: `
       SELECT Auth_TIMESTAMP
       FROM p1fchwgbm.acvw_all_ac_entries
-      WHERE TRN_DT >= TO_DATE('${date}', 'DD-MON-RR')  and
-      USER_ID in ('MBUSER','PROFINCHEX')
+      WHERE TRN_DT >= TO_DATE('${date}', 'DD-MON-RR') 
       ORDER BY TRN_DT ASC
       FETCH FIRST 1 ROWS ONLY
     `
@@ -32,8 +31,8 @@ function GenerateQuery(date, check = false) {
 
       m_topup_count: `select count(*) from p1fchwgbm.ACTBS_DAILY_LOG where USER_ID='MBUSER' and TRN_DT>='${date}' and DRCR_IND='C'and AC_NO ='0837904621602'`,
       m_topup_sum: `select sum(LCY_AMOUNT)  from p1fchwgbm.ACTBS_DAILY_LOG where USER_ID='MBUSER' and DRCR_IND='C' and TRN_DT>='${date}' and AC_NO ='0837904621602'`,
-      m_telebirr_count: `select COUNT(*) from p1fchwgbm.partner_trn_request where ENTRY_DATE>='${date}' AND MAKER_ID ='MBUSER' and CBSSTATUS='C' and  PARTNERRESPONSESTATUS=2`,
-      m_telebirr_sum: `select sum(LCY_AMOUNT) from p1fchwgbm.partner_trn_request where ENTRY_DATE>='${date}' AND MAKER_ID ='MBUSER' and CBSSTATUS='C' and  PARTNERRESPONSESTATUS=2`,
+      m_telebirr_count: `select COUNT(*) from p1fchwgbm.WSO2_TELEBIRR_OUTGOING  where ENTRY_DATE>='${date}' AND MAKER_ID ='MOBILE' and CBSSTATUS='C' and  PARTNERRESPONSESTATUS=2`,
+      m_telebirr_sum: `select sum(LCY_AMOUNT) from p1fchwgbm.WSO2_TELEBIRR_OUTGOING  where ENTRY_DATE>='${date}' AND MAKER_ID ='MOBILE' and CBSSTATUS='C' and  PARTNERRESPONSESTATUS=2`,
 
       u_topup_count: `select COUNT(*) from p1fchwgbm.ACTBS_DAILY_LOG where USER_ID='PROFINCHEX' and TRN_DT>='${date}' and DRCR_IND='C' and AC_NO ='0837904621602'`,
       u_topup_sum: `select sum(LCY_AMOUNT)  from p1fchwgbm.ACTBS_DAILY_LOG where USER_ID='PROFINCHEX'  and TRN_DT>='${date}' and AC_NO ='0837904621602' and DRCR_IND='C'`,

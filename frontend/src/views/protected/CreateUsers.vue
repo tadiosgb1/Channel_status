@@ -27,6 +27,7 @@
           <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Last Name</th>
           <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Email</th>
           <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Username</th>
+          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Status</th>
           <th class="px-2 py-3 text-left text-sm font-medium uppercase border border-primary">Role</th>
           <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">Actions</th>
         </tr>
@@ -42,6 +43,8 @@
           <td class="px-6 py-4 border border-primary">{{ user.last_name }}</td>
           <td class="px-6 py-4 border border-primary">{{ user.email }}</td>
           <td class="px-6 py-4 border border-primary">{{ user.username }}</td>
+          <td class="px-2 py-4 border border-primary text-green-600 hover:text-green-800 font-semibold"  v-if="user.status === 'Active'">{{ user.status }}</td>
+          <td class="px-2 py-4 border border-primary text-orange-600 hover:text-orange-800 font-semibold"  v-else>{{ user.status }}</td>
 
           <td class="px-6 py-4 border border-primary">
             <span
@@ -67,7 +70,7 @@
               class="text-orange-600 hover:text-orange-800 font-semibold"
             >
               <i class="fa-solid fa-user-slash mr-1"></i>
-              Deactivate
+              Block
             </button>
 
             <button
@@ -76,7 +79,7 @@
               class="text-green-600 hover:text-green-800 font-semibold"
             >
               <i class="fa-solid fa-user-check mr-1"></i>
-              Activate
+              Unblock 
             </button>
         </td>
 
