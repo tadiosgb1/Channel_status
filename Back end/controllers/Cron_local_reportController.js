@@ -62,12 +62,12 @@ module.exports = {
 
 async getChartReport(req, res) {
   try {
-    const { type, date, month, year, week } = req.query;
+    const { type, date, month, year, week, start, end } = req.query;
 
     if (!type) {
       return res.status(400).json({
         status: false,
-        message: "type is required (daily, weekly, monthly, quarterly, yearly)"
+        message: "type is required (daily, weekly, monthly, quarterly, yearly, range)"
       });
     }
 
@@ -86,19 +86,46 @@ async getChartReport(req, res) {
 
     // ---------- Define labels ----------
     if (type === "daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2, "0"));
-
     if (type === "weekly") labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
     if (type === "monthly") labels = [
       "Week 1 (1–7)",
       "Week 2 (8–14)",
       "Week 3 (15–21)",
       "Week 4 (22–end)"
     ];
-
-    if (type === "quarterly") labels = ["Q1","Q2","Q3","Q4"];
-
+    if (type === "quarterly") labels = ["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"];
     if (type === "yearly") labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    // ---------- RANGE type setup ----------
+    let rangeLabels = [];
+    let rangeStart, rangeEnd;
+    if (type === "range") {
+      if (!start || !end) {
+        return res.status(400).json({
+          status: false,
+          message: "start and end query params are required for range type"
+        });
+      }
+
+      rangeStart = new Date(start);
+      rangeEnd = new Date(end);
+      if (rangeEnd < rangeStart) {
+        return res.status(400).json({
+          status: false,
+          message: "end date must be after start date"
+        });
+      }
+
+      // generate list of days
+      const tempLabels = [];
+      const curr = new Date(rangeStart);
+      while (curr <= rangeEnd) {
+        tempLabels.push(curr.toISOString().slice(0, 10));
+        curr.setDate(curr.getDate() + 1);
+      }
+      rangeLabels = tempLabels;
+      labels = rangeLabels; // use for series mapping
+    }
 
     // ---------- Aggregate records ----------
     records.forEach(r => {
@@ -126,11 +153,9 @@ async getChartReport(req, res) {
           dayOfMonth <= 7 ? 1 :
           dayOfMonth <= 14 ? 2 :
           dayOfMonth <= 21 ? 3 : 4;
-
         if (weekNo !== Number(week)) return;
 
-        // Convert JS Sunday=0 to Mon=0
-        const dayIndex = (d.getDay() + 6) % 7;
+        const dayIndex = (d.getDay() + 6) % 7; // Mon=0
         label = labels[dayIndex];
       }
 
@@ -148,7 +173,7 @@ async getChartReport(req, res) {
           labels[3];
       }
 
-      // QUARTERLY → Q1–Q4 of year
+      // QUARTERLY → 4 quarters of the year
       if (type === "quarterly") {
         if (!year) return;
         if (d.getFullYear() !== Number(year)) return;
@@ -166,6 +191,13 @@ async getChartReport(req, res) {
         if (!year) return;
         if (d.getFullYear() !== Number(year)) return;
         label = labels[d.getMonth()];
+      }
+
+      // RANGE → by day
+      if (type === "range") {
+        const dayStr = d.toISOString().slice(0, 10);
+        if (d < rangeStart || d > rangeEnd) return;
+        label = dayStr;
       }
 
       if (!label) return;
@@ -205,6 +237,7 @@ async getChartReport(req, res) {
     });
   }
 }
+
 
 
 
