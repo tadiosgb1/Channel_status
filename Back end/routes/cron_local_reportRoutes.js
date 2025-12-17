@@ -7,4 +7,5 @@ router.get("/:id",  auth,controller.getOne);
 router.post("/",  auth, controller.create);
 router.put("/:id",   auth,controller.update);
 router.delete("/:id",  auth,controller.delete);
+router.get("/chart/report", auth,controller.getChartReport)
 module.exports = router;
