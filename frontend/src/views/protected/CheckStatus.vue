@@ -1,11 +1,19 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen space-y-6">
+  <div class="px-6 bg-gray-100 min-h-screen space-y-4"  ref="reportRef">
     <!-- Header -->
     <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md">
       <h1 class="text-3xl font-semi ">Channel Status Update</h1>
-      <p class=" font-semibold mt-1">
+     <div class="flex justify-between">
+       <p class=" font-semibold mt-1">
         Report from: <span class="text-primary">{{ formatDate(report.datecheck) }}</span> <span class="text-green-500">--</span> <span class="text-[#0f3c50]">{{ formatDate(getDate) }}</span>
       </p>
+      <!-- <button 
+        @click="copyPage"
+        class="mb-4 px-4 py-2 bg-primary text-white rounded-lg shadow"
+      >
+        Copy Report
+      </button> -->
+     </div>
     </div>
 
     <!-- Loading Spinner -->
@@ -101,13 +109,14 @@ import ApiService from "@/services/ApiService";
 
 const loading = ref(true);
 const report = ref({});
+const reportRef = ref(null);
 
 const mobileAppOps = ref([]);
 const ussdOps = ref([]);
 const internalTransfer = ref({ count: 0, sum: 0 });
 
 const api = new ApiService();
-
+const eror=ref(null);
 
 const getDate = new Date();
 const formattedDate = getDate.toISOString().split("T")[0];    
@@ -125,6 +134,21 @@ const formatNumber = (num) => {
     maximumFractionDigits: 2
   });
 };
+
+
+
+
+const copyPage = async () => {
+  const htmlContent = reportRef.value.outerHTML; // or innerHTML
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      "text/html": new Blob([htmlContent], { type: "text/html" }),
+      "text/plain": new Blob([reportRef.value.innerText], { type: "text/plain" }),
+    }),
+  ]);
+  alert("Report copied with formatting!");
+};
+
 
 const getReport = async () => {
   try {
@@ -161,6 +185,8 @@ const getReport = async () => {
     };
 
   } catch (err) {
+    loading.value = false;
+     eror.value=err.response.data.message || "An error occurred";
     console.error("Error fetching report:", err);
   } finally {
     loading.value = false;

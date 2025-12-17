@@ -53,24 +53,12 @@ cron.schedule("*/2 * * * *", async () => {
     console.log("Cron job triggering /api/reports/report");
 
     // Fetch the report from your API
-    // const response = await axios.get(`${process.env.APP_URL}/api/reports/report`, {
-    //   headers: { "x-system-key": process.env.SYSTEM_KEY } // if system auth
-    // });
+    const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
+    const reportData = response.data; // the full API response
 
-      const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
-      const reportData = response.data; // the full API response
-    // Check if record already exists
-      const existing = await Cron_local_report.findOne();
-
-    if (existing) {
-      // Update existing record
-      await existing.update({ data: reportData });
-      console.log("Report updated successfully at", new Date());
-    } else {
-      // Create new record
-      await Cron_local_report.create({ data: reportData });
-      console.log("Report created successfully at", new Date());
-    }
+    // Always create a new record
+    await Cron_local_report.create({ data: reportData });
+    console.log("Report created successfully at", new Date());
 
   } catch (err) {
     console.error("Cron job failed:", err.message);
@@ -78,6 +66,7 @@ cron.schedule("*/2 * * * *", async () => {
 }, {
   timezone: "Africa/Addis_Ababa"
 });
+
 
 
 

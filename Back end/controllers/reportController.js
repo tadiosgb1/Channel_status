@@ -14,7 +14,7 @@ async function connectDatabases() {
     if (!oracleConn) {
       oracleConn = await oracledb.getConnection({
         user: process.env.ORACLE_USER,
-        password: 'Kid#ussdprod1234',
+        password: "Kid#ussdprod1234",
         connectString: process.env.ORACLE_CONN,
       });
     }
@@ -23,8 +23,8 @@ async function connectDatabases() {
       mysqlConn = await mysql.createConnection({
         host: process.env.MYSQL_HOST,
         port: process.env.MYSQL_PORT,
-        user:process.env.MYSQL_USER,
-        password: 'Kid@ussdprod1',
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASS,
         database: process.env.MYSQL_DB,
       });
     }
@@ -40,6 +40,8 @@ module.exports = {
       await connectDatabases();
 
       const data = await fetchData();
+
+      
       res.json({
         message: "Report fetched successfully",
         data: formatJsonData(data.data),

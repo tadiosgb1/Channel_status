@@ -11,7 +11,7 @@ import CreateUsers from "@/views/protected/CreateUsers.vue";
 
 const routes = [
   { path: "/", component: login, meta: { requiresGuest: true } },
-  { path: "/login", component: login, meta: { requiresGuest: true } },
+  { path: "/login", name: "login", component: login, meta: { requiresGuest: true } },
 
   {
     path: "/dashboard",

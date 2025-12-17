@@ -21,7 +21,7 @@
             class="w-14 h-14 rounded-full border-2 border-primary object-cover"
           />
           <div>
-            <h2 class="text-2xl font-bold text-gray-800">
+            <h2 class="text-2xl font-bold text-white">
               Welcome, {{ user.first_name }}
             </h2>
             <p class="text-gray-500 text-sm capitalize">
