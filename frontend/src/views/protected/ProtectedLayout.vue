@@ -11,7 +11,7 @@
       <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
-      <header class="mb-2 flex justify-between items-center  p-6  bg-[#0f3c50] shadow-md border-b-4 border-primary mx-4 lg:mx-0 rounded-b-xl">
+      <header class="mb-2 flex justify-between items-center  p-6  bg-[#04445F] shadow-md border-b-4 border-primary mx-4 lg:mx-0 rounded-b-xl">
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
           <img

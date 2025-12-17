@@ -35,6 +35,17 @@
       <ul class="space-y-1">
         <li>
           <RouterLink
+            :to="{ name: 'dashboard' }"
+            @click="closeOnMobile"
+            class="flex items-center p-4 rounded-lg mx-3 text-gray-700 hover:bg-secondary hover:text-white transition-all"
+            :class="{ 'bg-primary text-white font-semibold shadow-md': isActive('dashboard') }"
+          >
+            <span class="mr-3"><i class="fa-solid fa-gauge"></i></span>
+            Dashboard
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink
             :to="{ name: 'check-status' }"
             @click="closeOnMobile"
             class="flex items-center p-4 rounded-lg mx-3 text-gray-700 hover:bg-secondary hover:text-white transition-all"

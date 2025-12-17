@@ -58,7 +58,7 @@
           <td class="px-4 py-2 border border-primary">{{ op.name }}</td>
           <td class="px-4 py-2 border border-primary">{{ op.count }}</td>
           <td class="px-4 py-2 border border-primary">{{ formatNumber(op.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-primary font-semibold">{{ op.status }}</td>
+          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">{{ op.status }}</td>
         </tr>
 
         <!-- USSD -->
@@ -78,7 +78,7 @@
           <td class="px-4 py-2 border border-primary">{{ op.name }}</td>
           <td class="px-4 py-2 border border-primary">{{ op.count }}</td>
           <td class="px-4 py-2 border border-primary">{{ formatNumber(op.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-primary font-semibold">{{ op.status }}</td>
+          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">{{ op.status }}</td>
         </tr>
 
         <!-- INTERNAL TRANSFER -->
@@ -88,7 +88,7 @@
           <td class="px-4 py-2 border border-primary">Internal Transfer</td>
           <td class="px-4 py-2 border border-primary">{{ internalTransfer.count }}</td>
           <td class="px-4 py-2 border border-primary">{{ formatNumber(internalTransfer.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-primary font-semibold">UP</td>
+          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">UP</td>
         </tr>
 
         <!-- INTERNET/OBDX -->
@@ -149,6 +149,27 @@ const copyPage = async () => {
   alert("Report copied with formatting!");
 };
 
+
+// const mobileAppData = ref([]);
+// const ussdData = ref([]);
+
+// const getUssdAppData = async () => {
+//   try {
+//     const res = await api.get("/cron_local_report/app/report ");
+//     ussdData.value = res.data;
+//   } catch (err) {
+//     console.error("Error fetching USSD app data:", err);
+//   }
+// };
+
+// const getMobileAppData = async () => {
+//   try {
+//     const res = await api.get("/mobile_app_users");
+//     mobileAppData.value = res.data;
+//   } catch (err) {
+//     console.error("Error fetching mobile app data:", err);
+//   }
+// };
 
 const getReport = async () => {
   try {
