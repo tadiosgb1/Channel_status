@@ -365,7 +365,6 @@ async getMobileChartReport(req, res) {
       if(type==="quarterly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; const mi=d.getMonth(); label=mi<3?labels[0]:mi<6?labels[1]:mi<9?labels[2]:labels[3]; }
       if(type==="yearly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; label=labels[d.getMonth()]; }
       if(type==="range"){ if(d<rangeStart||d>rangeEnd) return; label=d.toISOString().slice(0,10); }
-
       if(!label) return; if(!buckets[label]) buckets[label]={};
       Object.keys(data).forEach(key => {
   // Include m_ prefixed keys AND app_count

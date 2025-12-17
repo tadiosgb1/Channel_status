@@ -6,39 +6,57 @@ module.exports = {
   // ======================
   // REGISTER
   // ======================
-   register: async (req, res) => {
-    try {
-      const { first_name, last_name, username, email, password, role } = req.body;
-
-      const hashed = await bcrypt.hash(password, 10);
-
-      const user = await User.create({
-        first_name,
-        last_name,
-        username,
-        email,
-        password: hashed,
-        role
-      });
-
-     // Send email with username and password
-      if (email) {
-        await sendRegistrationEmail(email, username, password);
-      }
-
-      // Remove password before sending response
-      const userResponse = user.toJSON();
-      delete userResponse.password;
-
-      res.json({ message: "Registered successfully, email sent", user: userResponse });
-      
-       res.json({ message: "Registered successfully", user: userResponse });
-    } catch (err) {
-      console.log("error",err
-      );
-      res.status(500).json({ error: err.message });
+ register: async (req, res) => {
+  try {
+    // 1. Get userId from session
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
     }
-  },
+
+    // 2. Fetch user from database
+    const sessionUser = await User.findByPk(userId);
+    if (!sessionUser) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // 3. Only allow Admin role
+    if (sessionUser.role !== "Admin") {
+      return res.status(403).json({ message: "Only Admin can register new users" });
+    }
+
+    const { first_name, last_name, username, email, password, role } = req.body;
+
+    // 4. Hash the password
+    const hashed = await bcrypt.hash(password, 10);
+
+    // 5. Create new user
+    const user = await User.create({
+      first_name,
+      last_name,
+      username,
+      email,
+      password: hashed,
+      role
+    });
+
+    // 6. Send email if provided
+    if (email) {
+      await sendRegistrationEmail(email, username, password);
+    }
+
+    // 7. Remove password before sending response
+    const userResponse = user.toJSON();
+    delete userResponse.password;
+
+    res.json({ message: "Registered successfully, email sent", user: userResponse });
+
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ error: err.message });
+  }
+},
+
 
   // ======================
   // LOGIN (email OR username)
