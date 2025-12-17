@@ -24,6 +24,7 @@ module.exports = {
      // Send email with username and password
       if (email) {
         await sendRegistrationEmail(email, username, password);
+        console.log("email",email)
       }
 
       // Remove password before sending response

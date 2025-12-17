@@ -2,7 +2,7 @@
   <div class="flex min-h-screen bg-gray-100">
 
     <!-- Sidebar -->
-    <Sidebar /> <!-- This is the togglable sidebar we created -->
+    <Sidebar />
 
     <!-- Main content -->
     <div class="flex-1 lg:ml-64">
@@ -12,6 +12,7 @@
 
       <!-- Header Card -->
       <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
+
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
           <img
@@ -23,18 +24,45 @@
             <h2 class="text-2xl font-bold text-gray-800">
               Welcome, {{ user.first_name }}
             </h2>
-            <p class="text-gray-500 text-sm capitalize">Logged in as: {{ user?.role || 'Admin' }}</p>
+            <p class="text-gray-500 text-sm capitalize">
+              Logged in as: {{ user?.role || 'Admin' }}
+            </p>
           </div>
         </div>
 
-        <!-- Logout Icon -->
-        <button
-          @click="showModal = true"
-          class="text-primary hover:text-primary/80 text-3xl p-2 rounded-full hover:bg-primary/10 transition"
-          title="Logout"
-        >
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </button>
+        <!-- 🔴 User Dropdown -->
+        <div class="relative">
+          <button
+            @click.stop="toggleDropdown"
+            class="text-primary hover:text-primary/80 text-3xl p-2 rounded-full hover:bg-primary/10 transition"
+            title="Account Actions"
+          >
+            <i class="fa-solid fa-user-gear"></i>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div
+            v-if="showDropdown"
+            class="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-50"
+          >
+            <button
+              @click="openChangePassword"
+              class="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-gray-100"
+            >
+              <i class="fa-solid fa-key text-primary"></i>
+              Change Password
+            </button>
+
+            <button
+              @click="openLogoutModal"
+              class="w-full px-4 py-3 flex items-center gap-3 text-red-600 hover:bg-gray-100"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+
       </header>
 
       <!-- Nested Routes -->
@@ -42,17 +70,22 @@
         <router-view />
       </main>
 
-      <!-- Logout Confirmation Modal -->
+      <!-- 🔴 Change Password Modal -->
+      <ChangePasswordModal
+        v-if="showChangePassword"
+        @close="showChangePassword = false"
+      />
+
+      <!-- 🔴 Logout Confirmation Modal -->
       <div
-        v-if="showModal"
+        v-if="showLogoutModal"
         class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       >
         <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl relative border-t-4 border-primary">
 
-          <!-- Close Button -->
           <button
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-lg"
-            @click="showModal = false"
+            @click="showLogoutModal = false"
           >
             ✖
           </button>
@@ -68,7 +101,7 @@
 
           <div class="flex justify-center gap-4">
             <button
-              @click="showModal = false"
+              @click="showLogoutModal = false"
               class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
             >
               Cancel
@@ -91,19 +124,26 @@
 
 <script setup>
 import Sidebar from '@/components/layouts/Sidebar.vue'
+import ChangePasswordModal from '@/components/modals/ChangePasswordModal.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import ApiService from "@/services/ApiService";
+import ApiService from "@/services/ApiService"
+
 const router = useRouter()
-const showModal = ref(false)
 const apiService = new ApiService()
+
+/* 🔴 State */
+const showDropdown = ref(false)
+const showLogoutModal = ref(false)
+const showChangePassword = ref(false)
+
 const user = ref({
   first_name: 'Admin',
   role: 'Admin',
   avatar: ''
 })
 
-// Load user info from localStorage
+/* Load user info */
 onMounted(() => {
   const firstName = localStorage.getItem('first_name')
   const role = localStorage.getItem('role')
@@ -114,18 +154,41 @@ onMounted(() => {
     user.value.role = role || 'Admin'
     user.value.avatar = avatar || ''
   }
+
+  document.addEventListener('click', handleClickOutside)
 })
 
-// Logout function
+/* Dropdown handlers */
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
+}
+
+const openChangePassword = () => {
+  showDropdown.value = false
+  showChangePassword.value = true
+}
+
+const openLogoutModal = () => {
+  showDropdown.value = false
+  showLogoutModal.value = true
+}
+
+const handleClickOutside = (e) => {
+  if (!e.target.closest('.relative')) {
+    showDropdown.value = false
+  }
+}
+
+/* Logout */
 const logout = async () => {
- await apiService.post('/auth/logout').catch(() => {
-    // Ignore errors on logout
-  })
+  await apiService.post('/auth/logout').catch(() => {})
 
   localStorage.removeItem('isAuthenticated')
   localStorage.removeItem('first_name')
   localStorage.removeItem('role')
   localStorage.removeItem('avatar')
+  localStorage.removeItem('id')
+
   router.push('/login')
 }
 </script>
