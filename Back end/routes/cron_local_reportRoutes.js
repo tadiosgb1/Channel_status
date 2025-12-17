@@ -7,6 +7,7 @@ const auth = require("../middleware/authMiddleware");
 router.get("/chart/report", auth, controller.getChartReport);
 router.get("/ussd/report", auth, controller.getUssdChartReport);
 router.get("/app/report", auth, controller.getMobileChartReport);
+router.get("/metric/report", auth, controller.metricBasedChart);
 
 // ---------- CRUD routes ----------
 router.get("/", auth, controller.getAll);
