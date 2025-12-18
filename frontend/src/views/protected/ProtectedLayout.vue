@@ -11,8 +11,12 @@
       <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
+<<<<<<< HEAD
       <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
 
+=======
+      <header class="mb-2 flex justify-between items-center  p-6  bg-[#04445F] shadow-md border-b-4 border-primary mx-4 lg:mx-0 rounded-b-xl">
+>>>>>>> 69fdd173ea275ce329f8b32856ceee258a142e88
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
           <img

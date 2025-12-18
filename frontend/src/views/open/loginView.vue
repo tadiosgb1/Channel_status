@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex justify-center items-center bg-[#0f3c50]">
+  <div class="min-h-screen flex justify-center items-center bg-[#04445F]">
     <div class="bg-white w-full max-w-md rounded-xl shadow-lg p-8 flex flex-col items-center">
       <!-- Brand Logo -->
       <img src="@/assets/logo.png" alt="Brand Logo" class="w-16 h-16 mb-4" />

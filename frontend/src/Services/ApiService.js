@@ -4,15 +4,15 @@ class ApiService {
   constructor() {
     this.setHeader(localStorage.getItem('access_token'))
   }
-
-  async get(endpoint) {
-    try {
-      const response = await api.get(endpoint)
-      return response.data
-    } catch (error) {
-      return error
-    }
+async get(endpoint, params = {}) {
+  try {
+    const response = await api.get(endpoint, { params })  // only wrap once
+    return response.data
+  } catch (error) {
+    console.error(`GET ${endpoint} failed:`, error.response || error.message || error)
+    throw error
   }
+}
 
   async post(endpoint, data) {
     try {
