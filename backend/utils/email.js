@@ -26,6 +26,9 @@ const sendRegistrationEmail = async (email, username, password) => {
       <p><strong>Password:</strong> ${password}</p>
       <br/>
       <p>Please log in and change your password immediately.</p>
+       <p><a href="${process.env.LOGIN_USER}">
+  ${process.env.LOGIN_USER}
+</a></p>
       <br/>
       <p>Best regards,<br>Wegagen Bank</p>
     `

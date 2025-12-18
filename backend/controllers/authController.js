@@ -40,10 +40,10 @@ module.exports = {
       role
     });
 
-    // 6. Send email if provided
-    if (email) {
-      await sendRegistrationEmail(email, username, password);
-    }
+     // Send email with username and password
+      if (email) {
+        await sendRegistrationEmail(email, username, password);
+      }
 
     // 7. Remove password before sending response
     const userResponse = user.toJSON();
@@ -96,6 +96,7 @@ module.exports = {
 
 
 changePassword: async (req, res) => {
+  console.log("passs",req.body)
   try {
     const userId = req.session.userId;
     if (!userId) {

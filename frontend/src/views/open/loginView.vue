@@ -87,6 +87,7 @@ const verifyLogin = async () => {
       localStorage.setItem('username', username.value);
       localStorage.setItem('first_name', res.user?.first_name || '');
       localStorage.setItem('role', res.user?.role || '');
+      localStorage.setItem('id', res.user?.id || '');
       localStorage.setItem('avatar', res.user?.avatar || '');
 
       localStorage.setItem("isAuthenticated", true);
