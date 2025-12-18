@@ -1,90 +1,162 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen space-y-6">
+  <div class=" bg-gray-50 min-h-screen space-y-8">
 
     <!-- Header + Filters -->
-    <div class="flex flex-wrap gap-4 justify-between items-center">
-      <h1 class="text-3xl font-semibold">Channel Dashboard</h1>
+    <div class="bg-white rounded-xl shadow-sm p-6 m-4">
+      <div class="flex flex-wrap gap-4 justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Channel Operations Dashboard</h1>
 
-      <div class="flex flex-wrap gap-2 items-center">
-        <!-- Type -->
-        <select v-model="type" @change="loadDashboard" class="border rounded-lg px-3 py-2">
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="quarterly">Quarterly</option>
-          <option value="yearly">Yearly</option>
-          <option value="range">Date Range</option>
+       <div class="flex justify-between">
+        <select name="channel" id="channel" v-model="activeChannel"
+          class="border border-secondary rounded-lg px-4 py-2.5 mr-6 focus:ring-2  focus:ring-primary">
+          <option value="mobile">Mobile App</option>
+          <option value="ussd">USSD</option   > 
         </select>
+        
+         <div class="flex flex-wrap gap-3 items-center">
+          <select v-model="type" @change="loadDashboard" class="border border-secondary rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+            <option value="range">Date Range</option>
+          </select>
 
-        <!-- Year -->
-        <select
-          v-if="['weekly','monthly','quarterly','yearly'].includes(type)"
-          v-model="year"
-          @change="loadDashboard"
-          class="border rounded-lg px-3 py-2"
-        >
-          <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
-        </select>
+          <select v-if="['weekly','monthly','quarterly','yearly'].includes(type)" v-model="year" @change="loadDashboard"
+            class="border border-gray-300 rounded-lg px-4 py-2.5">
+            <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+          </select>
 
-        <!-- Month -->
-        <select
-          v-if="['weekly','monthly'].includes(type)"
-          v-model="month"
-          @change="loadDashboard"
-          class="border rounded-lg px-3 py-2"
-        >
-          <option v-for="m in 12" :key="m" :value="m">Month {{ m }}</option>
-        </select>
+          <select v-if="['weekly','monthly'].includes(type)" v-model="month" @change="loadDashboard"
+            class="border border-gray-300 rounded-lg px-4 py-2.5">
+            <option v-for="m in 12" :key="m" :value="m">{{ monthNames[m - 1] }}</option>
+          </select>
 
-        <!-- Week -->
-        <select
-          v-if="type === 'weekly'"
-          v-model="week"
-          @change="loadDashboard"
-          class="border rounded-lg px-3 py-2"
-        >
-          <option v-for="w in 4" :key="w" :value="w">Week {{ w }}</option>
-        </select>
+          <select v-if="type === 'weekly'" v-model="week" @change="loadDashboard"
+            class="border border-gray-300 rounded-lg px-4 py-2.5">
+            <option v-for="w in 5" :key="w" :value="w">Week {{ w }}</option>
+          </select>
 
-        <!-- Date range -->
-        <input
-          v-if="type === 'range'"
-          type="date"
-          v-model="start"
-          @change="loadDashboard"
-          class="border rounded-lg px-3 py-2"
-        />
-        <input
-          v-if="type === 'range'"
-          type="date"
-          v-model="end"
-          @change="loadDashboard"
-          class="border rounded-lg px-3 py-2"
-        />
+          <div v-if="type === 'range'" class="flex gap-3">
+            <input type="date" v-model="start" @change="loadDashboard" class="border border-gray-300 rounded-lg px-4 py-2.5" />
+            <input type="date" v-model="end" @change="loadDashboard" class="border border-gray-300 rounded-lg px-4 py-2.5" />
+          </div>
+        </div>
+
+       </div>
       </div>
     </div>
 
-    <!-- Error -->
-    <div v-if="error" class="text-red-500 font-semibold">{{ error }}</div>
+    <!-- Error / Loading -->
+    <div v-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg font-medium">{{ error }}</div>
+    <div v-if="loading" class="text-center text-gray-600 font-medium py-12">Loading dashboard data...</div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="text-gray-500 font-semibold">Loading dashboard...</div>
+    <!-- Main Tabs: Mobile vs USSD -->
+    <div v-else class="w-full">
+     
 
-    <!-- Charts -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Mobile -->
-      <div class="bg-white p-6 rounded-xl shadow">
-        <h2 class="font-semibold mb-4">Mobile App Operations</h2>
-        <apexchart height="350" type="bar" :options="mobileOptions" :series="mobileSeries" />
-      </div>
+      <!-- Channel Content (Full Width) -->
+      <div class="mt-8">
+        <!-- Mobile App Tab -->
+        <div v-show="activeChannel === 'mobile'">
+          <!-- Sub-tabs: Counts vs Amounts -->
+          <div class="border-b border-gray-200 mb-8">
+            <nav class="flex space-x-6">
+              <button
+                @click="mobileTab = 'counts'"
+                :class="[
+                  'py-3 px-1 border-b-2 font-medium text-base',
+                  mobileTab === 'counts'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary '
+                ]"
+              >
+                Transaction Counts
+              </button>
+              <button
+                @click="mobileTab = 'amounts'"
+                :class="[
+                  'py-3 px-1 border-b-2 font-medium text-base',
+                  mobileTab === 'amounts'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary'
+                ]"
+              >
+                Transaction Amounts (ETB)
+              </button>
+            </nav>
+          </div>
 
-      <!-- USSD -->
-      <div class="bg-white p-6 rounded-xl shadow">
-        <h2 class="font-semibold mb-4">USSD Operations</h2>
-        <apexchart height="350" type="bar" :options="ussdOptions" :series="ussdSeries" />
+          <!-- Mobile Counts Chart -->
+          <div v-if="mobileTab === 'counts'" class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-2xl font-semibold text-gray-800">Mobile App - Transaction Counts</h2>
+              <p class="text-sm text-gray-500 mt-2">Number of operations per hour/day across all services</p>
+            </div>
+            <apexchart type="bar" height="550" :options="mobileCountOptions" :series="mobileCountSeries" />
+          </div>
+
+          <!-- Mobile Amounts Chart -->
+          <div v-if="mobileTab === 'amounts'" class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-2xl font-semibold text-gray-800">Mobile App - Transaction Amounts (ETB)</h2>
+              <p class="text-sm text-gray-500 mt-2">Total monetary value transacted per hour/day</p>
+            </div>
+            <apexchart type="bar" height="550" :options="mobileAmountOptions" :series="mobileAmountSeries" />
+          </div>
+        </div>
+
+        <!-- USSD Tab -->
+        <div v-show="activeChannel === 'ussd'">
+          <!-- Sub-tabs -->
+          <div class="border-b border-gray-200 mb-8">
+            <nav class="flex space-x-6">
+              <button
+                @click="ussdTab = 'counts'"
+                :class="[
+                  'py-3 px-1 border-b-2 font-medium text-base',
+                  ussdTab === 'counts'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
+                ]"
+              >
+                Transaction Counts
+              </button>
+              <button
+                @click="ussdTab = 'amounts'"
+                :class="[
+                  'py-3 px-1 border-b-2 font-medium text-base',
+                  ussdTab === 'amounts'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
+                ]"
+              >
+                Transaction Amounts (ETB)
+              </button>
+            </nav>
+          </div>
+
+          <!-- USSD Counts Chart -->
+          <div v-if="ussdTab === 'counts'" class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-2xl font-semibold text-gray-800">USSD - Transaction Counts</h2>
+              <p class="text-sm text-gray-500 mt-2">Number of operations per hour/day across all services</p>
+            </div>
+            <apexchart type="bar" height="550" :options="ussdCountOptions" :series="ussdCountSeries" />
+          </div>
+
+          <!-- USSD Amounts Chart -->
+          <div v-if="ussdTab === 'amounts'" class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-2xl font-semibold text-gray-800">USSD - Transaction Amounts (ETB)</h2>
+              <p class="text-sm text-gray-500 mt-2">Total monetary value transacted per hour/day</p>
+            </div>
+            <apexchart type="bar" height="550" :options="ussdAmountOptions" :series="ussdAmountSeries" />
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -92,10 +164,6 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 import VueApexCharts from "vue3-apexcharts";
-
-/* =======================
-   STATE
-======================= */
 const api = new ApiService();
 
 const type = ref("daily");
@@ -106,26 +174,27 @@ const start = ref("");
 const end = ref("");
 
 const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-/* Chart data */
-const mobileLabels = ref([]);
-const mobileSeries = ref([]);
-const ussdLabels = ref([]);
-const ussdSeries = ref([]);
+// Tab states
+const activeChannel = ref("mobile");
+const mobileTab = ref("counts");
+const ussdTab = ref("counts");
 
 const error = ref(null);
 const loading = ref(false);
 
-/* =======================
-   HELPERS
-======================= */
-const buildQueryParams = () => {
-  const params = { type: type.value }; // always send type
+const mobileRaw = ref({ labels: [], series: {} });
+const ussdRaw = ref({ labels: [], series: {} });
 
+// Colors
+const colors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316"];
+
+const buildQueryParams = () => {
+  const params = { type: type.value };
   if (["weekly","monthly","quarterly","yearly"].includes(type.value)) params.year = year.value;
   if (["weekly","monthly"].includes(type.value)) params.month = month.value;
   if (type.value === "weekly") params.week = week.value;
-
   if (type.value === "range") {
     if (!start.value || !end.value) {
       error.value = "Please select both start and end dates";
@@ -134,44 +203,28 @@ const buildQueryParams = () => {
     params.start = start.value;
     params.end = end.value;
   }
-
   return params;
 };
 
-/* =======================
-   API CALLS
-======================= */
 const loadMobileChart = async () => {
   const params = buildQueryParams();
   if (!params) return;
-
   try {
     const res = await api.get("/cron_local_report/app/report", params);
-    mobileLabels.value = res.labels || [];
-    mobileSeries.value = Object.keys(res.series || {}).map(key => ({
-      name: key.replace("m_", "").replace("_count", ""),
-      data: res.series[key],
-    }));
-  } catch (err) {
-    console.error(err);
-    error.value = "Failed to load Mobile App chart";
+    mobileRaw.value = { labels: res.labels || [], series: res.series || {} };
+  } catch {
+    error.value = "Failed to load Mobile App data";
   }
 };
 
 const loadUssdChart = async () => {
   const params = buildQueryParams();
   if (!params) return;
-
   try {
     const res = await api.get("/cron_local_report/ussd/report", params);
-    ussdLabels.value = res.labels || [];
-    ussdSeries.value = Object.keys(res.series || {}).map(key => ({
-      name: key.replace("u_", "").replace("_count", ""),
-      data: res.series[key],
-    }));
-  } catch (err) {
-    console.error(err);
-    error.value = "Failed to load USSD chart";
+    ussdRaw.value = { labels: res.labels || [], series: res.series || {} };
+  } catch {
+    error.value = "Failed to load USSD data";
   }
 };
 
@@ -182,28 +235,80 @@ const loadDashboard = async () => {
   loading.value = false;
 };
 
-/* =======================
-   CHART OPTIONS
-======================= */
-const baseChartOptions = (labels) => ({
-  chart: { toolbar: { show: false } },
+const cleanName = (key) => {
+  return key
+    .replace(/^m_|^u_/, '')
+    .replace(/_count|_sum$/, '')
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+};
+
+// Shared chart options
+const chartOptions = (labels, yTitle, formatter) => ({
+  chart: { toolbar: { show: true }, fontFamily: 'Inter, sans-serif' },
+  colors,
+  plotOptions: { bar: { borderRadius: 8, columnWidth: '55%', endingShape: 'rounded' } },
   dataLabels: { enabled: false },
-  stroke: { curve: "smooth" },
-  xaxis: { categories: labels },
-  plotOptions: { bar: { borderRadius: 6 } }
+  legend: { position: 'top', horizontalAlign: 'left', fontSize: '14px' },
+  xaxis: { categories: labels, labels: { style: { fontSize: '12px' } } },
+  yaxis: { title: { text: yTitle }, labels: { formatter } },
+  tooltip: { shared: true, intersect: false, y: { formatter } },
+  grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
 });
 
-const mobileOptions = computed(() => baseChartOptions(mobileLabels.value));
-const ussdOptions = computed(() => baseChartOptions(ussdLabels.value));
+// Mobile Counts
+const mobileCountSeries = computed(() => {
+  const keys = Object.keys(mobileRaw.value.series || {}).filter(k => k.includes('_count') && !k.includes('app_count'));
+  return keys.map(key => ({ name: cleanName(key), data: mobileRaw.value.series[key] || [] }));
+});
+const mobileCountOptions = computed(() => chartOptions(
+  mobileRaw.value.labels,
+  'Transaction Count',
+  val => val.toLocaleString()
+));
 
-/* =======================
-   INIT
-======================= */
-onMounted(() => loadDashboard());
+// Mobile Amounts
+const mobileAmountSeries = computed(() => {
+  const keys = Object.keys(mobileRaw.value.series || {}).filter(k => k.includes('_sum'));
+  return keys.map(key => ({ name: cleanName(key), data: mobileRaw.value.series[key] || [] }));
+});
+const mobileAmountOptions = computed(() => chartOptions(
+  mobileRaw.value.labels,
+  'Amount (ETB)',
+  val => 'ETB ' + val.toLocaleString(undefined, { maximumFractionDigits: 0 })
+));
+
+// USSD Counts
+const ussdCountSeries = computed(() => {
+  const keys = Object.keys(ussdRaw.value.series || {}).filter(k => k.includes('_count'));
+  return keys.map(key => ({ name: cleanName(key), data: ussdRaw.value.series[key] || [] }));
+});
+const ussdCountOptions = computed(() => chartOptions(
+  ussdRaw.value.labels,
+  'Transaction Count',
+  val => val.toLocaleString()
+));
+
+// USSD Amounts
+const ussdAmountSeries = computed(() => {
+  const keys = Object.keys(ussdRaw.value.series || {}).filter(k => k.includes('_sum'));
+  return keys.map(key => ({ name: cleanName(key), data: ussdRaw.value.series[key] || [] }));
+});
+const ussdAmountOptions = computed(() => chartOptions(
+  ussdRaw.value.labels,
+  'Amount (ETB)',
+  val => 'ETB ' + val.toLocaleString(undefined, { maximumFractionDigits: 0 })
+));
+
+onMounted(loadDashboard);
 </script>
 
 <script>
 export default {
-  components: { apexchart: VueApexCharts }
+  components: {
+    apexchart: VueApexCharts
+  }
 };
 </script>
