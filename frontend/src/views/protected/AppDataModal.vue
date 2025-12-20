@@ -1,200 +1,233 @@
-<!-- src/components/AppDataModal.vue -->
 <template>
-  <!-- Modal Overlay -->
-  <div
-    v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
-    @click.self="close"
-  >
-    <!-- Modal Card -->
-    <div
-      class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in"
-    >
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-6xl rounded-xl shadow-lg p-6">
+
       <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-2xl font-bold">
-              {{ channel === 'mobile' ? 'Mobile App' : 'USSD' }} Transactions
-            </h2>
-            <p class="text-blue-100 mt-1">
-              {{ title }} • {{ formatDateRange }}
-            </p>
-          </div>
-          <button
-            @click="close"
-            class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-primary">
+          Mobile App – Daily Report (Hourly)
+        </h2>
+        <button
+          @click="$emit('close')"
+          class="text-gray-500 hover:text-red-500 text-xl"
+        >
+          ✕
+        </button>
       </div>
 
-      <!-- Body: Scrollable Table -->
-      <div class="flex-1 overflow-y-auto p-6">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-50 sticky top-0">
-              <tr>
-                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Transaction Type
-                </th>
-                <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Count
-                </th>
-                <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount (ETB)
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="item in tableData"
-                :key="item.name"
-                class="hover:bg-gray-50 transition"
-              >
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ item.name }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
-                  {{ item.count.toLocaleString() }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right font-medium">
-                  {{ item.amount ? 'ETB ' + item.amount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—' }}
-                </td>
-              </tr>
-            </tbody>
-            <!-- Total Row -->
-            <tfoot class="bg-gray-100 font-semibold">
-              <tr>
-                <td class="px-6 py-5 text-left">Total</td>
-                <td class="px-6 py-5 text-right">{{ totalCount.toLocaleString() }}</td>
-                <td class="px-6 py-5 text-right text-blue-600">
-                  ETB {{ totalAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) }}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+      <!-- Loading -->
+      <div v-if="loading" class="text-center py-20 text-gray-500 font-medium">
+        Loading mobile app data...
+      </div>
+
+      <!-- Error -->
+      <div v-else-if="error" class="text-red-600 text-center py-12 font-medium">
+        {{ error }}
+      </div>
+
+      <!-- Charts -->
+      <div v-else>
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+          <nav class="flex space-x-8">
+            <button
+              @click="tab = 'counts'"
+              :class="tabClass('counts')"
+            >
+              Transaction Counts
+            </button>
+            <button
+              @click="tab = 'amounts'"
+              :class="tabClass('amounts')"
+            >
+              Transaction Amounts (ETB)
+            </button>
+          </nav>
         </div>
 
-        <div v-if="tableData.length === 0" class="text-center py-12 text-gray-500">
-          No transaction data available for this period.
-        </div>
+        <!-- Counts Chart -->
+        <apexchart
+          v-if="tab === 'counts'"
+          type="bar"
+          height="460"
+          :options="countOptions"
+          :series="countSeries"
+        />
+
+        <!-- Amounts Chart -->
+        <apexchart
+          v-if="tab === 'amounts'"
+          type="bar"
+          height="460"
+          :options="amountOptions"
+          :series="amountSeries"
+        />
       </div>
 
       <!-- Footer -->
-      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        <div class="text-sm text-gray-600">
-          Data refreshed on: {{ new Date().toLocaleString() }}
-        </div>
+      <div class="mt-6 text-right">
+        <button
+          @click="$emit('close')"
+          class="px-4 py-2 bg-primary text-white rounded-lg"
+        >
+          Close
+        </button>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, onMounted } from "vue";
+import ApiService from "@/services/ApiService";
 
+/* Optional date support */
 const props = defineProps({
-  isOpen: Boolean,
-  channel: {
+  date: {
     type: String,
-    required: true,
-    validator: (v) => ['mobile', 'ussd'].includes(v)
+    default: null,
   },
-  type: String, // daily, weekly, etc.
-  year: Number,
-  month: Number,
-  week: Number,
-  start: String,
-  end: String,
-  rawData: {
-    type: Object,
-    default: () => ({ series: {}, labels: [] })
+});
+
+const loading = ref(false);
+const error = ref(null);
+const raw = ref({ labels: [], series: {} });
+const tab = ref("counts");
+
+const api = new ApiService();
+
+/* Colors (same style as dashboard) */
+const colors = [
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#EF4444",
+  "#8B5CF6",
+  "#EC4899",
+  "#14B8A6",
+  "#F97316",
+];
+
+/* Format backend keys to readable labels */
+const cleanName = (key) =>
+  key
+    .replace(/^m_/, "")
+    .replace(/_count|_sum$/, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+
+/* API call – DAILY like dashboard */
+const getDailyAppReport = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+
+    const params = { type: "daily" };
+    if (props.date) params.date = props.date;
+
+    const res = await api.get("/cron_local_report/app/report", params);
+
+    raw.value = {
+      labels: res.labels || [],
+      series: res.series || {},
+    };
+  } catch (err) {
+    error.value =
+      err?.response?.data?.message || "Failed to load daily app report";
+    console.error("App Modal Error:", err);
+  } finally {
+    loading.value = false;
   }
-});
-
-const emit = defineEmits(['update:isOpen']);
-
-const close = () => {
-  emit('update:isOpen', false);
 };
 
-// Clean name helper (same as in dashboard)
-const cleanName = (key) => {
-  return key
-    .replace(/^m_|^u_/, '')
-    .replace(/_count|_sum$/, '')
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-};
+/* ===== Series Builders ===== */
 
-// Build table data: match _count and _sum pairs
-const tableData = computed(() => {
-  const series = props.rawData.series || {};
-  const entries = [];
+const countSeries = computed(() =>
+  Object.keys(raw.value.series)
+    .filter(k => k.endsWith("_count") && k !== "app_count")
+    .map(k => ({
+      name: cleanName(k),
+      data: raw.value.series[k],
+    }))
+);
 
-  const countKeys = Object.keys(series).filter(k =>
-    k.includes('_count') && !(props.channel === 'mobile' && k.includes('app_count'))
-  );
+const amountSeries = computed(() =>
+  Object.keys(raw.value.series)
+    .filter(k => k.endsWith("_sum"))
+    .map(k => ({
+      name: cleanName(k),
+      data: raw.value.series[k],
+    }))
+);
 
-  countKeys.forEach(countKey => {
-    const baseName = countKey.replace('_count', '');
-    const sumKey = baseName + '_sum';
-    const name = cleanName(countKey);
+/* ===== Chart Options ===== */
 
-    let totalCount = 0;
-    let totalAmount = 0;
-
-    // Sum across all labels (in case of multiple data points)
-    (series[countKey] || []).forEach(val => totalCount += val);
-    if (series[sumKey]) {
-      (series[sumKey] || []).forEach(val => totalAmount += val);
-    }
-
-    entries.push({
-      name,
-      count: totalCount,
-      amount: totalAmount || null
-    });
-  });
-
-  return entries.sort((a, b) => b.count - a.count); // Sort by count descending
+const baseOptions = (yTitle, formatter) => ({
+  chart: {
+    toolbar: { show: true },
+    fontFamily: "Inter, sans-serif",
+  },
+  colors,
+  plotOptions: {
+    bar: {
+      borderRadius: 6,
+      columnWidth: "55%",
+    },
+  },
+  dataLabels: { enabled: false },
+  legend: {
+    position: "top",
+    horizontalAlign: "left",
+    fontSize: "14px",
+  },
+  xaxis: {
+    categories: raw.value.labels,
+    title: { text: "Hour" },
+  },
+  yaxis: {
+    title: { text: yTitle },
+    labels: { formatter },
+  },
+  tooltip: {
+    shared: true,
+    intersect: false,
+    y: { formatter },
+  },
+  grid: {
+    borderColor: "#f1f5f9",
+    strokeDashArray: 4,
+  },
 });
 
-const totalCount = computed(() => tableData.value.reduce((sum, item) => sum + item.count, 0));
-const totalAmount = computed(() => tableData.value.reduce((sum, item) => sum + (item.amount || 0), 0));
+const countOptions = computed(() =>
+  baseOptions("Transaction Count", v => v.toLocaleString())
+);
 
-const title = computed(() => {
-  if (props.type === 'daily') return 'Daily Summary';
-  if (props.type === 'weekly') return `Week ${props.week}, ${props.year}`;
-  if (props.type === 'monthly') return `${monthNames.value[props.month - 1]} ${props.year}`;
-  if (props.type === 'quarterly') return `Q${Math.ceil(props.month / 3)} ${props.year}`;
-  if (props.type === 'yearly') return `${props.year}`;
-  if (props.type === 'range') return `${props.start} to ${props.end}`;
-  return 'Summary';
-});
+const amountOptions = computed(() =>
+  baseOptions(
+    "Amount (ETB)",
+    v => "ETB " + v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  )
+);
 
-const monthNames = ref([
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-]);
+/* Tabs styling */
+const tabClass = (t) => [
+  "py-3 px-1 border-b-2 font-medium text-base",
+  tab.value === t
+    ? "border-primary text-primary"
+    : "border-transparent text-gray-600 hover:text-primary hover:border-primary",
+];
 
-const formatDateRange = computed(() => {
-  return title.value;
-});
+onMounted(getDailyAppReport);
 </script>
 
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-</style>
+<script>
+import VueApexCharts from "vue3-apexcharts";
+
+export default {
+  components: {
+    apexchart: VueApexCharts,
+  },
+};
+</script>

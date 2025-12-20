@@ -281,15 +281,30 @@ const mobileAmountOptions = computed(() => chartOptions(
 ));
 
 // USSD Counts
-const ussdCountSeries = computed(() => {
-  const keys = Object.keys(ussdRaw.value.series || {}).filter(k => k.includes('_count'));
-  return keys.map(key => ({ name: cleanName(key), data: ussdRaw.value.series[key] || [] }));
+// Compute total users separately (ussd_count)
+const totalUssdUsers = computed(() => {
+  const arr = ussdRaw.value.series?.ussd_count || [];
+  return arr.reduce((sum, v) => sum + Number(v || 0), 0);
 });
+
+// Compute series for chart (exclude 'ussd_count')
+const ussdCountSeries = computed(() => {
+  const keys = Object.keys(ussdRaw.value.series || {}).filter(
+    k => k.includes('_count') && k !== 'ussd_count' // exclude total users
+  );
+  return keys.map(key => ({
+    name: cleanName(key),
+    data: ussdRaw.value.series[key] || []
+  }));
+});
+
+// Chart options
 const ussdCountOptions = computed(() => chartOptions(
   ussdRaw.value.labels,
   'Transaction Count',
   val => val.toLocaleString()
 ));
+
 
 // USSD Amounts
 const ussdAmountSeries = computed(() => {
