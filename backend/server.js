@@ -53,11 +53,13 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // cron.schedule("*/2 * * * *", async () => {
 //   try {
 //     console.log("Cron job triggering /api/reports/report");
+
 //     // Fetch the report from your API
 //     const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
 //     const reportData = response.data; // the full API response
+
 //     // Always create a new record
-//     await Daily_cron_local_report.create({ data: reportData });
+//     await Cron_local_report.create({ data: reportData });
 //     console.log("Report created successfully at", new Date());
 
 //   } catch (err) {
@@ -73,6 +75,7 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 //  console.log("startToday",startOfToday)
 let isCronRunning = false;
 
+<<<<<<< HEAD
 cron.schedule("*/2 * * * *", async () => {
   if (isCronRunning) {
     console.log("Previous cron still running, skipping this run");
@@ -151,6 +154,8 @@ cron.schedule("*/2 * * * *", async () => {
 
 
 
+=======
+>>>>>>> d067c6f9508ddc4de8e7756fcb93cf0733fe36d4
 
 
 
