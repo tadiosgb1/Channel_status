@@ -30,16 +30,10 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 mb-6">
           <nav class="flex space-x-8">
-            <button
-              @click="tab = 'count'"
-              :class="tabClass('count')"
-            >
+            <button @click="tab = 'count'" :class="tabClass('count')">
               Transaction Count
             </button>
-            <button
-              @click="tab = 'amount'"
-              :class="tabClass('amount')"
-            >
+            <button @click="tab = 'amount'" :class="tabClass('amount')">
               Transaction Amount (ETB)
             </button>
           </nav>
@@ -82,7 +76,7 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 
-/* Optional specific date */
+/* Props */
 const props = defineProps({
   date: {
     type: String,
@@ -90,13 +84,14 @@ const props = defineProps({
   },
 });
 
+/* State */
 const loading = ref(false);
 const error = ref(null);
 const tab = ref("count");
 
-/* Raw API response */
+/* Raw API Data */
 const raw = ref({
-  labels: [],
+  hours: [],
   series: {},
 });
 
@@ -113,8 +108,10 @@ const fetchUssdReport = async () => {
 
     const res = await api.get("/cron_local_report/ussd/report", params);
 
-    raw.value.labels = res.labels || [];
-    raw.value.series = res.series || {};
+    raw.value = {
+      hours: res.hours || [],
+      series: res.series || {},
+    };
   } catch (err) {
     error.value =
       err?.response?.data?.message || "Failed to load USSD daily report";
@@ -135,7 +132,7 @@ const labelName = (key) => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-/* ===== Series ===== */
+/* ===== SERIES ===== */
 
 const countSeries = computed(() =>
   Object.keys(raw.value.series)
@@ -143,14 +140,13 @@ const countSeries = computed(() =>
       k =>
         k.endsWith("_count") &&
         !k.includes("compare") &&
-        k !== "ussd_count"   // 👈 exclude total
+        k !== "ussd_count"
     )
     .map(k => ({
       name: labelName(k),
       data: raw.value.series[k],
     }))
 );
-
 
 const amountSeries = computed(() =>
   Object.keys(raw.value.series)
@@ -161,7 +157,7 @@ const amountSeries = computed(() =>
     }))
 );
 
-/* ===== Chart Options ===== */
+/* ===== CHART OPTIONS ===== */
 
 const colors = [
   "#2563EB",
@@ -190,7 +186,7 @@ const baseOptions = (yTitle, formatter) => ({
     horizontalAlign: "left",
   },
   xaxis: {
-    categories: raw.value.labels,
+    categories: raw.value.hours,
     title: { text: "Hour" },
   },
   yaxis: {
@@ -219,7 +215,7 @@ const amountOptions = computed(() =>
   )
 );
 
-/* Tab styles */
+/* Tabs style */
 const tabClass = (t) => [
   "py-3 px-1 border-b-2 font-medium text-base",
   tab.value === t

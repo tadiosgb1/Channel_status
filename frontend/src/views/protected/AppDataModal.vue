@@ -30,16 +30,10 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 mb-6">
           <nav class="flex space-x-8">
-            <button
-              @click="tab = 'counts'"
-              :class="tabClass('counts')"
-            >
+            <button @click="tab = 'counts'" :class="tabClass('counts')">
               Transaction Counts
             </button>
-            <button
-              @click="tab = 'amounts'"
-              :class="tabClass('amounts')"
-            >
+            <button @click="tab = 'amounts'" :class="tabClass('amounts')">
               Transaction Amounts (ETB)
             </button>
           </nav>
@@ -82,7 +76,7 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 
-/* Optional date support */
+/* Props */
 const props = defineProps({
   date: {
     type: String,
@@ -90,14 +84,20 @@ const props = defineProps({
   },
 });
 
+/* State */
 const loading = ref(false);
 const error = ref(null);
-const raw = ref({ labels: [], series: {} });
 const tab = ref("counts");
+
+/* RAW API DATA */
+const raw = ref({
+  hours: [],
+  series: {},
+});
 
 const api = new ApiService();
 
-/* Colors (same style as dashboard) */
+/* Colors */
 const colors = [
   "#3B82F6",
   "#10B981",
@@ -109,7 +109,7 @@ const colors = [
   "#F97316",
 ];
 
-/* Format backend keys to readable labels */
+/* Clean backend keys */
 const cleanName = (key) =>
   key
     .replace(/^m_/, "")
@@ -117,7 +117,7 @@ const cleanName = (key) =>
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-/* API call – DAILY like dashboard */
+/* API CALL */
 const getDailyAppReport = async () => {
   try {
     loading.value = true;
@@ -129,7 +129,7 @@ const getDailyAppReport = async () => {
     const res = await api.get("/cron_local_report/app/report", params);
 
     raw.value = {
-      labels: res.labels || [],
+      hours: res.hours || [],
       series: res.series || {},
     };
   } catch (err) {
@@ -141,7 +141,7 @@ const getDailyAppReport = async () => {
   }
 };
 
-/* ===== Series Builders ===== */
+/* ===== SERIES ===== */
 
 const countSeries = computed(() =>
   Object.keys(raw.value.series)
@@ -161,7 +161,7 @@ const amountSeries = computed(() =>
     }))
 );
 
-/* ===== Chart Options ===== */
+/* ===== CHART OPTIONS ===== */
 
 const baseOptions = (yTitle, formatter) => ({
   chart: {
@@ -182,7 +182,7 @@ const baseOptions = (yTitle, formatter) => ({
     fontSize: "14px",
   },
   xaxis: {
-    categories: raw.value.labels,
+    categories: raw.value.hours,
     title: { text: "Hour" },
   },
   yaxis: {
@@ -211,7 +211,7 @@ const amountOptions = computed(() =>
   )
 );
 
-/* Tabs styling */
+/* Tabs Style */
 const tabClass = (t) => [
   "py-3 px-1 border-b-2 font-medium text-base",
   tab.value === t

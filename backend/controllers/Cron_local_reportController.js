@@ -267,6 +267,7 @@ async getUssdChartReport(req, res) {
 
    let records;
 
+   
     if (type === "daily") {
       records = await Daily_cron_local_report.findAll({
         order: [["id", "ASC"]],
@@ -280,6 +281,33 @@ async getUssdChartReport(req, res) {
       });
     }
 
+    const hours = [
+      "12 AM",
+      "01 AM",
+      "02 AM",
+      "03 AM",
+      "04 AM",
+      "05 AM",
+      "06 AM",
+      "07 AM",
+      "08 AM",
+      "09 AM",
+      "10 AM",
+      "11 AM",
+
+      "12 PM",
+      "01 PM",
+      "02 PM",
+      "03 PM",
+      "04 PM",
+      "05 PM",
+      "06 PM",
+      "07 PM",
+      "08 PM",
+      "09 PM",
+      "10 PM",
+      "11 PM"
+    ];
 
 
     if (!records.length)
@@ -288,7 +316,8 @@ async getUssdChartReport(req, res) {
     const toNumber = (v) => Number(String(v||0).replace(/,/g,"")) || 0;
     let buckets = {}, labels = [];
 
-    if(type==="daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2,"0"));
+    if(type==="daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2,"0"))
+
     if(type==="weekly") labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     if(type==="monthly") labels = ["Week 1 (1–7)","Week 2 (8–14)","Week 3 (15–21)","Week 4 (22–end)"];
     if(type==="quarterly") labels = ["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"];
@@ -337,6 +366,21 @@ async getUssdChartReport(req, res) {
     const lastRecord = records[records.length-1];
     const parsedLast = JSON.parse(lastRecord.data);
 
+
+    if(type=='daily'){
+
+    res.json({
+      status:true,
+      labels,
+      series,
+      hours,
+      individualExecutionTime: parsedLast.individualExecutionTime||{},
+      ExecutionTime: parsedLast.ExecutionTime||null,
+      createdAt: lastRecord.createdAt,
+      updatedAt: lastRecord.updatedAt
+    });
+
+    }else{
     res.json({
       status:true,
       labels,
@@ -346,6 +390,11 @@ async getUssdChartReport(req, res) {
       createdAt: lastRecord.createdAt,
       updatedAt: lastRecord.updatedAt
     });
+    }
+
+   
+
+
 
   } catch(err){ 
     res.status(500).json({ status:false, message:"Failed to generate USSD chart report", error:err.message });
@@ -370,6 +419,33 @@ async getMobileChartReport(req, res) {
       });
     }
 
+        const hours = [
+      "12 AM",
+      "01 AM",
+      "02 AM",
+      "03 AM",
+      "04 AM",
+      "05 AM",
+      "06 AM",
+      "07 AM",
+      "08 AM",
+      "09 AM",
+      "10 AM",
+      "11 AM",
+
+      "12 PM",
+      "01 PM",
+      "02 PM",
+      "03 PM",
+      "04 PM",
+      "05 PM",
+      "06 PM",
+      "07 PM",
+      "08 PM",
+      "09 PM",
+      "10 PM",
+      "11 PM"
+    ];
 
     if(!records.length)
       return res.json({ status:true, labels:[], series:{}, individualExecutionTime:{}, ExecutionTime:null, createdAt:null, updatedAt:null });
@@ -417,8 +493,23 @@ async getMobileChartReport(req, res) {
 
     const lastRecord=records[records.length-1];
     const parsedLast=JSON.parse(lastRecord.data);
+ if(type=='daily'){
+ res.json({status:true,
+       labels, series, 
+       hours,
+       individualExecutionTime:parsedLast.individualExecutionTime||{},
+        ExecutionTime:parsedLast.ExecutionTime||null,
+         createdAt:lastRecord.createdAt,
+          updatedAt:lastRecord.updatedAt});
+ }
+    res.json({status:true,
+       labels, series, 
+       individualExecutionTime:parsedLast.individualExecutionTime||{},
+        ExecutionTime:parsedLast.ExecutionTime||null,
+         createdAt:lastRecord.createdAt,
+          updatedAt:lastRecord.updatedAt});
 
-    res.json({status:true, labels, series, individualExecutionTime:parsedLast.individualExecutionTime||{}, ExecutionTime:parsedLast.ExecutionTime||null, createdAt:lastRecord.createdAt, updatedAt:lastRecord.updatedAt});
+          
 
   } catch(err){ 
     res.status(500).json({status:false,message:"Failed to generate Mobile chart report", error:err.message});
@@ -566,6 +657,14 @@ async metricBasedChart(req, res) {
     metricList.forEach(metric => {
       series[metric] = labels.map(l => buckets[l]?.[metric] || 0);
     });
+    if(type=='daily'){
+       res.json({
+       status: true,
+       hours,
+       labels,
+       series
+    });
+    }
 
     res.json({
       status: true,
