@@ -80,8 +80,8 @@ const verifyLogin = async () => {
 
     if (res) {
       // Save token
-      localStorage.setItem('access_token', res.access_token);
-      api.setHeader(res.access_token);
+      // localStorage.setItem('access_token', res.access_token);
+      // api.setHeader(res.access_token);
 
       // Save user info
       localStorage.setItem('username', username.value);
