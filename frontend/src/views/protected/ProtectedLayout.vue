@@ -132,7 +132,7 @@ import ApiService from "@/services/ApiService"
 const router = useRouter()
 const apiService = new ApiService()
 
-/* 🔴 State */
+
 const showDropdown = ref(false)
 const showLogoutModal = ref(false)
 const showChangePassword = ref(false)
@@ -143,7 +143,7 @@ const user = ref({
   avatar: ''
 })
 
-/* Load user info */
+
 onMounted(() => {
   const firstName = localStorage.getItem('first_name')
   const role = localStorage.getItem('role')
@@ -158,7 +158,7 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
 
-/* Dropdown handlers */
+
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
 }
@@ -179,7 +179,7 @@ const handleClickOutside = (e) => {
   }
 }
 
-/* Logout */
+
 const logout = async () => {
   await apiService.post('/auth/logout').catch(() => {})
 

@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cron_local_reportRoutes = require('./routes/cron_local_reportRoutes.js');
-
+const { Op } = require("sequelize");
 const session = require("express-session");
 const cors = require("cors");
 const db = require("./models");
@@ -10,6 +10,7 @@ const cron = require("node-cron");
 const {sendEmails} = require("./utils.js")
 const Cron_local_report = db.Cron_local_report;
 const Daily_cron_local_report = db.Daily_cron_local_report;
+
 // Routes
 const caseRoutes = require('./routes/caseRoutes.js');
 const authRoutes = require("./routes/authRoutes");
@@ -68,6 +69,91 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // }, {
 //   timezone: "Africa/Addis_Ababa"
 // });
+
+
+
+//  const startOfToday = new Date();
+//  console.log("startToday",startOfToday)
+let isCronRunning = false;
+
+cron.schedule("*/2 * * * *", async () => {
+  if (isCronRunning) {
+    console.log("Previous cron still running, skipping this run");
+    return;
+  }
+
+  isCronRunning = true;
+
+  try {
+    console.log("Cron job triggering /api/reports/report");
+
+    const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
+    const reportData = response.data; // ✅ DO NOT stringify
+
+    // 1️⃣ Always create in Daily
+    await Daily_cron_local_report.create({ data: reportData });
+
+    // 2️⃣ Daily cleanup (unchanged)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const lastPastDaily = await Daily_cron_local_report.findOne({
+      where: {
+        createdAt: { [Op.lt]: startOfToday }
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (lastPastDaily) {
+      const pastDateStart = new Date(lastPastDaily.createdAt);
+      pastDateStart.setHours(0, 0, 0, 0);
+
+      const pastDateEnd = new Date(pastDateStart);
+      pastDateEnd.setHours(23, 59, 59, 999);
+
+      // 🔥 DELETE ALL records from that past date
+      await Daily_cron_local_report.destroy({
+        where: {
+          createdAt: {
+            [Op.between]: [pastDateStart, pastDateEnd],
+          },
+        },
+      });
+
+      console.log(
+        `Daily cleanup: deleted ALL records for ${pastDateStart.toDateString()}`
+      );
+    }
+
+
+
+
+    // 3️⃣ Cron table create/update today
+    const endOfToday = new Date(startOfToday);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const todayReport = await Cron_local_report.findOne({
+      where: {
+        createdAt: { [Op.between]: [startOfToday, endOfToday] },
+      },
+    });
+
+    if (todayReport) {
+      await todayReport.update({ data: reportData });
+    } else {
+      await Cron_local_report.create({ data: reportData });
+    }
+
+  } catch (err) {
+    console.error("Cron job failed:", err.message);
+  } finally {
+    isCronRunning = false;
+  }
+}, {
+  timezone: "Africa/Addis_Ababa",
+});
+
+
 
 
 

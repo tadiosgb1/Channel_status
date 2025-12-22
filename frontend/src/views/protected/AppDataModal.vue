@@ -3,17 +3,16 @@
     <div class="bg-white w-full max-w-6xl rounded-xl shadow-lg p-6">
 
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
           Mobile App – Daily Report (Hourly)
         </h2>
-        <button
-          @click="$emit('close')"
-          class="text-gray-500 hover:text-red-500 text-xl"
-        >
+        <button @click="$emit('close')" class="text-gray-500 hover:text-red-500 text-xl">
           ✕
         </button>
       </div>
+
+      
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-20 text-gray-500 font-medium">
@@ -30,16 +29,10 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 mb-6">
           <nav class="flex space-x-8">
-            <button
-              @click="tab = 'counts'"
-              :class="tabClass('counts')"
-            >
+            <button @click="tab = 'counts'" :class="tabClass('counts')">
               Transaction Counts
             </button>
-            <button
-              @click="tab = 'amounts'"
-              :class="tabClass('amounts')"
-            >
+            <button @click="tab = 'amounts'" :class="tabClass('amounts')">
               Transaction Amounts (ETB)
             </button>
           </nav>
@@ -65,13 +58,29 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-6 text-right">
+      <div class="mt-6 text-right gap-4 flex justify-end items-center space-x-4">
+        <!-- Day / Night Toggle -->
+      
         <button
-          @click="$emit('close')"
-          class="px-4 py-2 bg-primary text-white rounded-lg"
+          @click="timeRange = 'day'"
+          :class="timeRange === 'day'
+            ? 'bg-yellow-500 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
         >
-          Close
+          Privious
         </button>
+
+        <button
+          @click="timeRange = 'night'"
+          :class="timeRange === 'night'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
+        >
+          Next 
+        </button>
+    
       </div>
 
     </div>
@@ -82,7 +91,7 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 
-/* Optional date support */
+/* Props */
 const props = defineProps({
   date: {
     type: String,
@@ -90,14 +99,21 @@ const props = defineProps({
   },
 });
 
+/* State */
 const loading = ref(false);
 const error = ref(null);
-const raw = ref({ labels: [], series: {} });
 const tab = ref("counts");
+const timeRange = ref("day"); // day | night
+
+/* RAW API DATA */
+const raw = ref({
+  hours: [],
+  series: {},
+});
 
 const api = new ApiService();
 
-/* Colors (same style as dashboard) */
+/* Colors */
 const colors = [
   "#3B82F6",
   "#10B981",
@@ -109,7 +125,7 @@ const colors = [
   "#F97316",
 ];
 
-/* Format backend keys to readable labels */
+/* Clean backend keys */
 const cleanName = (key) =>
   key
     .replace(/^m_/, "")
@@ -117,7 +133,7 @@ const cleanName = (key) =>
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-/* API call – DAILY like dashboard */
+/* API CALL */
 const getDailyAppReport = async () => {
   try {
     loading.value = true;
@@ -129,7 +145,7 @@ const getDailyAppReport = async () => {
     const res = await api.get("/cron_local_report/app/report", params);
 
     raw.value = {
-      labels: res.labels || [],
+      hours: res.hours || [],
       series: res.series || {},
     };
   } catch (err) {
@@ -141,14 +157,27 @@ const getDailyAppReport = async () => {
   }
 };
 
-/* ===== Series Builders ===== */
+/* ===== DAY / NIGHT SLICING ===== */
+
+const visibleHours = computed(() =>
+  timeRange.value === "day"
+    ? raw.value.hours.slice(0, 12)     // 06 AM → 05 PM
+    : raw.value.hours.slice(12, 24)    // 06 PM → 05 AM
+);
+
+const sliceData = (arr) =>
+  timeRange.value === "day"
+    ? arr.slice(0, 12)
+    : arr.slice(12, 24);
+
+/* ===== SERIES ===== */
 
 const countSeries = computed(() =>
   Object.keys(raw.value.series)
     .filter(k => k.endsWith("_count") && k !== "app_count")
     .map(k => ({
       name: cleanName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
@@ -157,11 +186,11 @@ const amountSeries = computed(() =>
     .filter(k => k.endsWith("_sum"))
     .map(k => ({
       name: cleanName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
-/* ===== Chart Options ===== */
+/* ===== CHART OPTIONS ===== */
 
 const baseOptions = (yTitle, formatter) => ({
   chart: {
@@ -179,10 +208,9 @@ const baseOptions = (yTitle, formatter) => ({
   legend: {
     position: "top",
     horizontalAlign: "left",
-    fontSize: "14px",
   },
   xaxis: {
-    categories: raw.value.labels,
+    categories: visibleHours.value,
     title: { text: "Hour" },
   },
   yaxis: {
@@ -211,7 +239,7 @@ const amountOptions = computed(() =>
   )
 );
 
-/* Tabs styling */
+/* Tabs Style */
 const tabClass = (t) => [
   "py-3 px-1 border-b-2 font-medium text-base",
   tab.value === t

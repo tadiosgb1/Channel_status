@@ -3,7 +3,7 @@
     <div class="bg-white w-full max-w-6xl rounded-xl shadow-lg p-6">
 
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
           USSD – Daily Hourly Report
         </h2>
@@ -30,16 +30,10 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 mb-6">
           <nav class="flex space-x-8">
-            <button
-              @click="tab = 'count'"
-              :class="tabClass('count')"
-            >
+            <button @click="tab = 'count'" :class="tabClass('count')">
               Transaction Count
             </button>
-            <button
-              @click="tab = 'amount'"
-              :class="tabClass('amount')"
-            >
+            <button @click="tab = 'amount'" :class="tabClass('amount')">
               Transaction Amount (ETB)
             </button>
           </nav>
@@ -65,12 +59,25 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-6 text-right">
+      <div class="mt-6 flex justify-end gap-4">
         <button
-          @click="$emit('close')"
-          class="px-4 py-2 bg-primary text-white rounded-lg"
+          @click="timeRange = 'day'"
+          :class="timeRange === 'day'
+            ? 'bg-yellow-500 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
         >
-          Close
+          Previous
+        </button>
+
+        <button
+          @click="timeRange = 'night'"
+          :class="timeRange === 'night'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
+        >
+          Next
         </button>
       </div>
 
@@ -82,7 +89,7 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 
-/* Optional specific date */
+/* Props */
 const props = defineProps({
   date: {
     type: String,
@@ -90,13 +97,15 @@ const props = defineProps({
   },
 });
 
+/* State */
 const loading = ref(false);
 const error = ref(null);
 const tab = ref("count");
+const timeRange = ref("day"); // day | night
 
-/* Raw API response */
+/* RAW API DATA */
 const raw = ref({
-  labels: [],
+  hours: [],
   series: {},
 });
 
@@ -113,8 +122,10 @@ const fetchUssdReport = async () => {
 
     const res = await api.get("/cron_local_report/ussd/report", params);
 
-    raw.value.labels = res.labels || [];
-    raw.value.series = res.series || {};
+    raw.value = {
+      hours: res.hours || [],
+      series: res.series || {},
+    };
   } catch (err) {
     error.value =
       err?.response?.data?.message || "Failed to load USSD daily report";
@@ -123,6 +134,19 @@ const fetchUssdReport = async () => {
     loading.value = false;
   }
 };
+
+/* ===== DAY / NIGHT HOURS ===== */
+
+const visibleHours = computed(() =>
+  timeRange.value === "day"
+    ? raw.value.hours.slice(0, 12)   // 06 AM → 05 PM
+    : raw.value.hours.slice(12, 24)  // 06 PM → 05 AM
+);
+
+const sliceData = (arr) =>
+  timeRange.value === "day"
+    ? arr.slice(0, 12)
+    : arr.slice(12, 24);
 
 /* Convert API keys to readable names */
 const labelName = (key) => {
@@ -135,7 +159,7 @@ const labelName = (key) => {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-/* ===== Series ===== */
+/* ===== SERIES ===== */
 
 const countSeries = computed(() =>
   Object.keys(raw.value.series)
@@ -143,25 +167,24 @@ const countSeries = computed(() =>
       k =>
         k.endsWith("_count") &&
         !k.includes("compare") &&
-        k !== "ussd_count"   // 👈 exclude total
+        k !== "ussd_count"
     )
     .map(k => ({
       name: labelName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
-
 
 const amountSeries = computed(() =>
   Object.keys(raw.value.series)
     .filter(k => k.endsWith("_sum"))
     .map(k => ({
       name: labelName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
-/* ===== Chart Options ===== */
+/* ===== CHART OPTIONS ===== */
 
 const colors = [
   "#2563EB",
@@ -190,7 +213,7 @@ const baseOptions = (yTitle, formatter) => ({
     horizontalAlign: "left",
   },
   xaxis: {
-    categories: raw.value.labels,
+    categories: visibleHours.value,
     title: { text: "Hour" },
   },
   yaxis: {
@@ -219,7 +242,7 @@ const amountOptions = computed(() =>
   )
 );
 
-/* Tab styles */
+/* Tabs style */
 const tabClass = (t) => [
   "py-3 px-1 border-b-2 font-medium text-base",
   tab.value === t
