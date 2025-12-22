@@ -493,8 +493,23 @@ async getMobileChartReport(req, res) {
 
     const lastRecord=records[records.length-1];
     const parsedLast=JSON.parse(lastRecord.data);
+ if(type=='daily'){
+ res.json({status:true,
+       labels, series, 
+       hours,
+       individualExecutionTime:parsedLast.individualExecutionTime||{},
+        ExecutionTime:parsedLast.ExecutionTime||null,
+         createdAt:lastRecord.createdAt,
+          updatedAt:lastRecord.updatedAt});
+ }
+    res.json({status:true,
+       labels, series, 
+       individualExecutionTime:parsedLast.individualExecutionTime||{},
+        ExecutionTime:parsedLast.ExecutionTime||null,
+         createdAt:lastRecord.createdAt,
+          updatedAt:lastRecord.updatedAt});
 
-    res.json({status:true, labels, series, individualExecutionTime:parsedLast.individualExecutionTime||{}, ExecutionTime:parsedLast.ExecutionTime||null, createdAt:lastRecord.createdAt, updatedAt:lastRecord.updatedAt});
+          
 
   } catch(err){ 
     res.status(500).json({status:false,message:"Failed to generate Mobile chart report", error:err.message});
