@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cron_local_reportRoutes = require('./routes/cron_local_reportRoutes.js');
+
 const session = require("express-session");
 const cors = require("cors");
 const db = require("./models");
@@ -8,6 +9,7 @@ const axios = require("axios");
 const cron = require("node-cron");
 const {sendEmails} = require("./utils.js")
 const Cron_local_report = db.Cron_local_report;
+const Daily_cron_local_report = db.Daily_cron_local_report;
 // Routes
 const caseRoutes = require('./routes/caseRoutes.js');
 const authRoutes = require("./routes/authRoutes");
@@ -48,23 +50,67 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 
+// cron.schedule("*/2 * * * *", async () => {
+//   try {
+//     console.log("Cron job triggering /api/reports/report");
+//     // Fetch the report from your API
+//     const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
+//     const reportData = response.data; // the full API response
+//     // Always create a new record
+//     await Daily_cron_local_report.create({ data: reportData });
+//     console.log("Report created successfully at", new Date());
+
+//   } catch (err) {
+//     console.error("Cron job failed:", err.message);
+//   }
+// }, {
+//   timezone: "Africa/Addis_Ababa"
+// });
+
+
+
 cron.schedule("*/2 * * * *", async () => {
   try {
     console.log("Cron job triggering /api/reports/report");
 
-    // Fetch the report from your API
     const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
-    const reportData = response.data; // the full API response
+    const reportData = response.data;
 
-    // Always create a new record
-    await Cron_local_report.create({ data: reportData });
-    console.log("Report created successfully at", new Date());
+    // 1️⃣ Always create for Daily_cron_local_report
+    await Daily_cron_local_report.create({ data: reportData });
+
+    // 2️⃣ Handle Cron_local_report (create or update for today)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const todayReport = await Cron_local_report.findOne({
+      where: {
+        createdAt: {
+          [Op.between]: [startOfToday, endOfToday],
+        },
+      },
+    });
+
+    if (todayReport) {
+      // Update existing record
+      await todayReport.update({ data: reportData });
+      console.log("Cron_local_report updated for today");
+    } else {
+      // Create new record
+      await Cron_local_report.create({ data: reportData });
+      console.log("Cron_local_report created for today");
+    }
+
+    console.log("Cron job completed at", new Date());
 
   } catch (err) {
     console.error("Cron job failed:", err.message);
   }
 }, {
-  timezone: "Africa/Addis_Ababa"
+  timezone: "Africa/Addis_Ababa",
 });
 
 
