@@ -3,17 +3,16 @@
     <div class="bg-white w-full max-w-6xl rounded-xl shadow-lg p-6">
 
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
           Mobile App – Daily Report (Hourly)
         </h2>
-        <button
-          @click="$emit('close')"
-          class="text-gray-500 hover:text-red-500 text-xl"
-        >
+        <button @click="$emit('close')" class="text-gray-500 hover:text-red-500 text-xl">
           ✕
         </button>
       </div>
+
+      
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-20 text-gray-500 font-medium">
@@ -59,13 +58,29 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-6 text-right">
+      <div class="mt-6 text-right gap-4 flex justify-end items-center space-x-4">
+        <!-- Day / Night Toggle -->
+      
         <button
-          @click="$emit('close')"
-          class="px-4 py-2 bg-primary text-white rounded-lg"
+          @click="timeRange = 'day'"
+          :class="timeRange === 'day'
+            ? 'bg-yellow-500 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
         >
-          Close
+          Privious
         </button>
+
+        <button
+          @click="timeRange = 'night'"
+          :class="timeRange === 'night'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
+        >
+          Next 
+        </button>
+    
       </div>
 
     </div>
@@ -88,6 +103,7 @@ const props = defineProps({
 const loading = ref(false);
 const error = ref(null);
 const tab = ref("counts");
+const timeRange = ref("day"); // day | night
 
 /* RAW API DATA */
 const raw = ref({
@@ -141,6 +157,19 @@ const getDailyAppReport = async () => {
   }
 };
 
+/* ===== DAY / NIGHT SLICING ===== */
+
+const visibleHours = computed(() =>
+  timeRange.value === "day"
+    ? raw.value.hours.slice(0, 12)     // 06 AM → 05 PM
+    : raw.value.hours.slice(12, 24)    // 06 PM → 05 AM
+);
+
+const sliceData = (arr) =>
+  timeRange.value === "day"
+    ? arr.slice(0, 12)
+    : arr.slice(12, 24);
+
 /* ===== SERIES ===== */
 
 const countSeries = computed(() =>
@@ -148,7 +177,7 @@ const countSeries = computed(() =>
     .filter(k => k.endsWith("_count") && k !== "app_count")
     .map(k => ({
       name: cleanName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
@@ -157,7 +186,7 @@ const amountSeries = computed(() =>
     .filter(k => k.endsWith("_sum"))
     .map(k => ({
       name: cleanName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
@@ -179,10 +208,9 @@ const baseOptions = (yTitle, formatter) => ({
   legend: {
     position: "top",
     horizontalAlign: "left",
-    fontSize: "14px",
   },
   xaxis: {
-    categories: raw.value.hours,
+    categories: visibleHours.value,
     title: { text: "Hour" },
   },
   yaxis: {

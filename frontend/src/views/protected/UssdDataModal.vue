@@ -3,7 +3,7 @@
     <div class="bg-white w-full max-w-6xl rounded-xl shadow-lg p-6">
 
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
           USSD – Daily Hourly Report
         </h2>
@@ -59,12 +59,25 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-6 text-right">
+      <div class="mt-6 flex justify-end gap-4">
         <button
-          @click="$emit('close')"
-          class="px-4 py-2 bg-primary text-white rounded-lg"
+          @click="timeRange = 'day'"
+          :class="timeRange === 'day'
+            ? 'bg-yellow-500 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
         >
-          Close
+          Previous
+        </button>
+
+        <button
+          @click="timeRange = 'night'"
+          :class="timeRange === 'night'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 text-gray-600'"
+          class="px-4 py-2 rounded-lg font-medium"
+        >
+          Next
         </button>
       </div>
 
@@ -88,8 +101,9 @@ const props = defineProps({
 const loading = ref(false);
 const error = ref(null);
 const tab = ref("count");
+const timeRange = ref("day"); // day | night
 
-/* Raw API Data */
+/* RAW API DATA */
 const raw = ref({
   hours: [],
   series: {},
@@ -121,6 +135,19 @@ const fetchUssdReport = async () => {
   }
 };
 
+/* ===== DAY / NIGHT HOURS ===== */
+
+const visibleHours = computed(() =>
+  timeRange.value === "day"
+    ? raw.value.hours.slice(0, 12)   // 06 AM → 05 PM
+    : raw.value.hours.slice(12, 24)  // 06 PM → 05 AM
+);
+
+const sliceData = (arr) =>
+  timeRange.value === "day"
+    ? arr.slice(0, 12)
+    : arr.slice(12, 24);
+
 /* Convert API keys to readable names */
 const labelName = (key) => {
   if (key === "ussd_count") return "Total USSD Users";
@@ -144,7 +171,7 @@ const countSeries = computed(() =>
     )
     .map(k => ({
       name: labelName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
@@ -153,7 +180,7 @@ const amountSeries = computed(() =>
     .filter(k => k.endsWith("_sum"))
     .map(k => ({
       name: labelName(k),
-      data: raw.value.series[k],
+      data: sliceData(raw.value.series[k]),
     }))
 );
 
@@ -186,7 +213,7 @@ const baseOptions = (yTitle, formatter) => ({
     horizontalAlign: "left",
   },
   xaxis: {
-    categories: raw.value.hours,
+    categories: visibleHours.value,
     title: { text: "Hour" },
   },
   yaxis: {
