@@ -48,24 +48,24 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 
-cron.schedule("*/2 * * * *", async () => {
-  try {
-    console.log("Cron job triggering /api/reports/report");
+// cron.schedule("*/2 * * * *", async () => {
+//   try {
+//     console.log("Cron job triggering /api/reports/report");
 
-    // Fetch the report from your API
-    const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
-    const reportData = response.data; // the full API response
+//     // Fetch the report from your API
+//     const response = await axios.get(`${process.env.APP_URL}/api/reports/report`);
+//     const reportData = response.data; // the full API response
 
-    // Always create a new record
-    await Cron_local_report.create({ data: reportData });
-    console.log("Report created successfully at", new Date());
+//     // Always create a new record
+//     await Cron_local_report.create({ data: reportData });
+//     console.log("Report created successfully at", new Date());
 
-  } catch (err) {
-    console.error("Cron job failed:", err.message);
-  }
-}, {
-  timezone: "Africa/Addis_Ababa"
-});
+//   } catch (err) {
+//     console.error("Cron job failed:", err.message);
+//   }
+// }, {
+//   timezone: "Africa/Addis_Ababa"
+// });
 
 
 
