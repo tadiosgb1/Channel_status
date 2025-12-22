@@ -26,8 +26,8 @@
     </div>
 
     <!-- Channels Table -->
-    <div v-else class="overflow-x-auto bg-white rounded-xl shadow-lg">
-    <table class="min-w-full border border-primary">
+<div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
+  <table class="min-w-full border-collapse bg-white">
       <thead class="bg-secondary text-white">
         <tr>
           <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Channel</th>
