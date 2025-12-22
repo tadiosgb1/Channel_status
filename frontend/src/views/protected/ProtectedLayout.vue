@@ -11,7 +11,8 @@
       <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
-      <header class="mb-2 flex justify-between items-center  p-3  bg-[#04445F] shadow-md border-b-4 border-primary mx-4 lg:mx-0 ">
+      <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
+
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
           <img
@@ -65,7 +66,7 @@
       </header>
 
       <!-- Nested Routes -->
-      <main class="p-3">
+      <main class="p-6">
         <router-view />
       </main>
 
@@ -86,7 +87,7 @@
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-lg"
             @click="showLogoutModal = false"
           >
-            ✖
+            ✖️
           </button>
 
           <h2 class="text-2xl font-bold text-center mb-4 text-gray-800 flex justify-center items-center space-x-2">
@@ -131,7 +132,7 @@ import ApiService from "@/services/ApiService"
 const router = useRouter()
 const apiService = new ApiService()
 
-/* 🔴 State */
+
 const showDropdown = ref(false)
 const showLogoutModal = ref(false)
 const showChangePassword = ref(false)
@@ -142,7 +143,7 @@ const user = ref({
   avatar: ''
 })
 
-/* Load user info */
+
 onMounted(() => {
   const firstName = localStorage.getItem('first_name')
   const role = localStorage.getItem('role')
@@ -157,7 +158,7 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
 
-/* Dropdown handlers */
+
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
 }
@@ -178,7 +179,7 @@ const handleClickOutside = (e) => {
   }
 }
 
-/* Logout */
+
 const logout = async () => {
   await apiService.post('/auth/logout').catch(() => {})
 

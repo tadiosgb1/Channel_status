@@ -56,7 +56,7 @@
           </RouterLink>
         </li>
 
-        <li>
+        <li v-if="role === 'Admin'">
           <RouterLink
             :to="{ name: 'create-users' }"
             @click="closeOnMobile"
@@ -95,6 +95,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import ApiService from '@/services/ApiService'
+const role = ref(localStorage.getItem('role'))
 
 const route = useRoute()
 const isOpen = ref(false)
