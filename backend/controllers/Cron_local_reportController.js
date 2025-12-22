@@ -260,64 +260,36 @@ async getChartReport(req, res) {
 ,
   // ------------------ USSD Chart Report ------------------
 // ------------------ USSD Chart Report ------------------
+
+
 async getUssdChartReport(req, res) {
   try {
     const { type, date, month, year, week, start, end } = req.query;
     if (!type) return res.status(400).json({ status: false, message: "type is required" });
 
-   let records;
-
-   
+    let records;
     if (type === "daily") {
       records = await Daily_cron_local_report.findAll({
         order: [["id", "ASC"]],
       });
-
-      console.log("records",records);
-
     } else {
       records = await Cron_local_report.findAll({
         order: [["id", "ASC"]],
       });
     }
-
-    const hours = [
-      "12 AM",
-      "01 AM",
-      "02 AM",
-      "03 AM",
-      "04 AM",
-      "05 AM",
-      "06 AM",
-      "07 AM",
-      "08 AM",
-      "09 AM",
-      "10 AM",
-      "11 AM",
-
-      "12 PM",
-      "01 PM",
-      "02 PM",
-      "03 PM",
-      "04 PM",
-      "05 PM",
-      "06 PM",
-      "07 PM",
-      "08 PM",
-      "09 PM",
-      "10 PM",
-      "11 PM"
-    ];
-
+   const hours = [
+  "06 AM","07 AM","08 AM","09 AM","10 AM","11 AM",
+  "12 PM","01 PM","02 PM","03 PM","04 PM","05 PM",
+  "06 PM","07 PM","08 PM","09 PM","10 PM","11 PM",
+  "12 AM","01 AM","02 AM","03 AM","04 AM","05 AM"
+];
 
     if (!records.length)
       return res.json({ status:true, labels:[], series:{}, individualExecutionTime:{}, ExecutionTime:null, createdAt:null, updatedAt:null });
 
     const toNumber = (v) => Number(String(v||0).replace(/,/g,"")) || 0;
     let buckets = {}, labels = [];
-
-    if(type==="daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2,"0"))
-
+    if(type==="daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2,"0"));
     if(type==="weekly") labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     if(type==="monthly") labels = ["Week 1 (1–7)","Week 2 (8–14)","Week 3 (15–21)","Week 4 (22–end)"];
     if(type==="quarterly") labels = ["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"];
@@ -331,85 +303,146 @@ async getUssdChartReport(req, res) {
       if(rangeEnd < rangeStart) return res.status(400).json({ status:false, message:"end must be after start" });
       const tempLabels = [];
       let curr = new Date(rangeStart);
-      while(curr <= rangeEnd) { tempLabels.push(curr.toISOString().slice(0,10)); curr.setDate(curr.getDate()+1); }
+      while(curr <= rangeEnd) { 
+        tempLabels.push(curr.toISOString().slice(0,10)); 
+        curr.setDate(curr.getDate()+1); 
+      }
       labels = tempLabels;
     }
 
-    records.forEach(r => {
-      const parsed = JSON.parse(r.data);
-      const data = parsed.data || {};
-      const d = new Date(data.datecheck || r.createdAt);
-      let label;
+    if(type==="daily") {
+      // 🟢 Pick only the latest record per hour
+      const targetDate = date ? new Date(date) : new Date();
+      const latestHourlyRecords = {};
 
-      if(type==="daily"){ const target = date?new Date(date):new Date(); if(d.toDateString()!==target.toDateString()) return; label=d.getHours().toString().padStart(2,"0"); }
-      if(type==="weekly"){ if(!year||!month||!week) return; if(d.getFullYear()!==Number(year)) return; if(d.getMonth()+1!==Number(month)) return; const dayOfMonth=d.getDate(); const weekNo=dayOfMonth<=7?1:dayOfMonth<=14?2:dayOfMonth<=21?3:4; if(weekNo!==Number(week)) return; label=labels[(d.getDay()+6)%7]; }
-      if(type==="monthly"){ if(!year||!month) return; if(d.getFullYear()!==Number(year)) return; if(d.getMonth()+1!==Number(month)) return; const dayOfMonth=d.getDate(); label=dayOfMonth<=7?labels[0]:dayOfMonth<=14?labels[1]:dayOfMonth<=21?labels[2]:labels[3]; }
-      if(type==="quarterly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; const mi=d.getMonth(); label=mi<3?labels[0]:mi<6?labels[1]:mi<9?labels[2]:labels[3]; }
-      if(type==="yearly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; label=labels[d.getMonth()]; }
-      if(type==="range"){ if(d<rangeStart||d>rangeEnd) return; label=d.toISOString().slice(0,10); }
+      records.forEach(r => {
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+        const d = new Date(data.datecheck || r.createdAt);
 
-      if(!label) return; 
-      if(!buckets[label]) buckets[label]={};
+        if (d.toDateString() !== targetDate.toDateString()) return;
 
-     Object.keys(data).forEach(key => {
-  // Include u_ prefixed keys AND ussd_count
-  if (key.startsWith("u_") || key === "ussd_count") {
-    buckets[label][key] = (buckets[label][key]||0) + toNumber(data[key]);
-  }
-});
-    });
+        const hour = d.getHours().toString().padStart(2, "0");
 
+        if (!latestHourlyRecords[hour] || new Date(r.createdAt) > new Date(latestHourlyRecords[hour].createdAt)) {
+          latestHourlyRecords[hour] = r;
+        }
+      });
+
+      Object.keys(latestHourlyRecords).forEach(hour => {
+        const r = latestHourlyRecords[hour];
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+
+        if (!buckets[hour]) buckets[hour] = {};
+
+        Object.keys(data).forEach(key => {
+          if (key.startsWith("u_") || key === "ussd_count") {
+            buckets[hour][key] = toNumber(data[key]); // ❌ No summation
+          }
+        });
+      });
+    } else {
+      // weekly/monthly/yearly/range aggregation
+      records.forEach(r => {
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+        const d = new Date(data.datecheck || r.createdAt);
+        let label;
+
+        if(type==="weekly"){
+          if(!year||!month||!week) return; 
+          if(d.getFullYear()!==Number(year)) return; 
+          if(d.getMonth()+1!==Number(month)) return; 
+          const dayOfMonth=d.getDate(); 
+          const weekNo=dayOfMonth<=7?1:dayOfMonth<=14?2:dayOfMonth<=21?3:4; 
+          if(weekNo!==Number(week)) return; 
+          label=labels[(d.getDay()+6)%7]; 
+        }
+        if(type==="monthly"){ 
+          if(!year||!month) return; 
+          if(d.getFullYear()!==Number(year)) return; 
+          if(d.getMonth()+1!==Number(month)) return; 
+          const dayOfMonth=d.getDate(); 
+          label=dayOfMonth<=7?labels[0]:dayOfMonth<=14?labels[1]:dayOfMonth<=21?labels[2]:labels[3]; 
+        }
+        if(type==="quarterly"){ 
+          if(!year) return; 
+          if(d.getFullYear()!==Number(year)) return; 
+          const mi=d.getMonth(); 
+          label=mi<3?labels[0]:mi<6?labels[1]:mi<9?labels[2]:labels[3]; 
+        }
+        if(type==="yearly"){ 
+          if(!year) return; 
+          if(d.getFullYear()!==Number(year)) return; 
+          label=labels[d.getMonth()]; 
+        }
+        if(type==="range"){ 
+          if(d<rangeStart||d>rangeEnd) return; 
+          label=d.toISOString().slice(0,10); 
+        }
+
+        if(!label) return; 
+        if(!buckets[label]) buckets[label]={};
+
+        Object.keys(data).forEach(key => {
+          if (key.startsWith("u_") || key === "ussd_count") {
+            buckets[label][key] = (buckets[label][key]||0) + toNumber(data[key]);
+          }
+        });
+      });
+    }
+
+    // Build series
     const series = {};
-    labels.forEach(label => { const metrics=buckets[label]||{}; Object.keys(metrics).forEach(metric=>{ if(!series[metric]) series[metric]=[]; }); });
-    Object.keys(series).forEach(metric=>{ series[metric] = labels.map(l=>buckets[l]?.[metric]||0); });
+    labels.forEach(label => { 
+      const metrics=buckets[label]||{}; 
+      Object.keys(metrics).forEach(metric=>{ if(!series[metric]) series[metric]=[]; }); 
+    });
+    Object.keys(series).forEach(metric=>{ 
+      series[metric] = labels.map(l=>buckets[l]?.[metric]||0); 
+    });
 
     const lastRecord = records[records.length-1];
     const parsedLast = JSON.parse(lastRecord.data);
 
-
-    if(type=='daily'){
-
-    res.json({
-      status:true,
-      labels,
-      series,
-      hours,
-      individualExecutionTime: parsedLast.individualExecutionTime||{},
-      ExecutionTime: parsedLast.ExecutionTime||null,
-      createdAt: lastRecord.createdAt,
-      updatedAt: lastRecord.updatedAt
-    });
-
-    }else{
-    res.json({
-      status:true,
-      labels,
-      series,
-      individualExecutionTime: parsedLast.individualExecutionTime||{},
-      ExecutionTime: parsedLast.ExecutionTime||null,
-      createdAt: lastRecord.createdAt,
-      updatedAt: lastRecord.updatedAt
-    });
+    if(type==='daily'){
+      res.json({
+        status:true,
+        labels,
+        series,
+        hours,
+        individualExecutionTime: parsedLast.individualExecutionTime||{},
+        ExecutionTime: parsedLast.ExecutionTime||null,
+        createdAt: lastRecord.createdAt,
+        updatedAt: lastRecord.updatedAt
+      });
+    } else {
+      res.json({
+        status:true,
+        labels,
+        series,
+        individualExecutionTime: parsedLast.individualExecutionTime||{},
+        ExecutionTime: parsedLast.ExecutionTime||null,
+        createdAt: lastRecord.createdAt,
+        updatedAt: lastRecord.updatedAt
+      });
     }
-
-   
-
-
 
   } catch(err){ 
     res.status(500).json({ status:false, message:"Failed to generate USSD chart report", error:err.message });
   }
-},
+}
+,
 
 // ------------------ Mobile/App Chart Report ------------------
 async getMobileChartReport(req, res) {
   try {
     const { type, date, month, year, week, start, end } = req.query;
-    if(!type) return res.status(400).json({ status:false, message:"type is required" });
+    if (!type) return res.status(400).json({ status:false, message:"type is required" });
 
     let records;
-
-    if (type == "daily") {
+    if (type === "daily") {
       records = await Daily_cron_local_report.findAll({
         order: [["id", "ASC"]],
       });
@@ -419,102 +452,166 @@ async getMobileChartReport(req, res) {
       });
     }
 
-        const hours = [
-      "12 AM",
-      "01 AM",
-      "02 AM",
-      "03 AM",
-      "04 AM",
-      "05 AM",
-      "06 AM",
-      "07 AM",
-      "08 AM",
-      "09 AM",
-      "10 AM",
-      "11 AM",
-
-      "12 PM",
-      "01 PM",
-      "02 PM",
-      "03 PM",
-      "04 PM",
-      "05 PM",
-      "06 PM",
-      "07 PM",
-      "08 PM",
-      "09 PM",
-      "10 PM",
-      "11 PM"
-    ];
+  const hours = [
+  "06 AM","07 AM","08 AM","09 AM","10 AM","11 AM",
+  "12 PM","01 PM","02 PM","03 PM","04 PM","05 PM",
+  "06 PM","07 PM","08 PM","09 PM","10 PM","11 PM",
+  "12 AM","01 AM","02 AM","03 AM","04 AM","05 AM"
+];
 
     if(!records.length)
       return res.json({ status:true, labels:[], series:{}, individualExecutionTime:{}, ExecutionTime:null, createdAt:null, updatedAt:null });
 
-    const toNumber = (v)=>Number(String(v||0).replace(/,/g,""))||0;
-    let buckets={}, labels=[];
+    const toNumber = (v) => Number(String(v||0).replace(/,/g,"")) || 0;
+    let buckets = {}, labels = [];
 
-    if(type==="daily") labels=[...Array(24).keys()].map(h=>h.toString().padStart(2,"0"));
-    if(type==="weekly") labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    if(type==="monthly") labels=["Week 1 (1–7)","Week 2 (8–14)","Week 3 (15–21)","Week 4 (22–end)"];
-    if(type==="quarterly") labels=["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"];
-    if(type==="yearly") labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    if(type==="daily") labels = [...Array(24).keys()].map(h => h.toString().padStart(2,"0"));
+    if(type==="weekly") labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    if(type==="monthly") labels = ["Week 1 (1–7)","Week 2 (8–14)","Week 3 (15–21)","Week 4 (22–end)"];
+    if(type==="quarterly") labels = ["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"];
+    if(type==="yearly") labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
     let rangeStart, rangeEnd;
     if(type==="range"){ 
-      if(!start||!end) return res.status(400).json({ status:false,message:"start and end required" }); 
-      rangeStart=new Date(start); 
-      rangeEnd=new Date(end); 
-      if(rangeEnd<rangeStart) return res.status(400).json({status:false,message:"end must be after start"}); 
-      const tempLabels=[]; let curr=new Date(rangeStart); while(curr<=rangeEnd){ tempLabels.push(curr.toISOString().slice(0,10)); curr.setDate(curr.getDate()+1);} 
-      labels=tempLabels; 
+      if(!start || !end) return res.status(400).json({ status:false,message:"start and end required" }); 
+      rangeStart = new Date(start); 
+      rangeEnd = new Date(end); 
+      if(rangeEnd < rangeStart) return res.status(400).json({status:false,message:"end must be after start"}); 
+      const tempLabels = [];
+      let curr = new Date(rangeStart); 
+      while(curr <= rangeEnd){ 
+        tempLabels.push(curr.toISOString().slice(0,10)); 
+        curr.setDate(curr.getDate()+1);
+      } 
+      labels = tempLabels; 
     }
 
-    records.forEach(r=>{
-      const parsed=JSON.parse(r.data); const data=parsed.data||{}; const d=new Date(data.datecheck||r.createdAt); let label;
+    if(type==="daily") {
+      // 🟢 Latest record per hour
+      const targetDate = date ? new Date(date) : new Date();
+      const latestHourlyRecords = {};
 
-      if(type==="daily"){ const target=date?new Date(date):new Date(); if(d.toDateString()!==target.toDateString()) return; label=d.getHours().toString().padStart(2,"0"); }
-      if(type==="weekly"){ if(!year||!month||!week) return; if(d.getFullYear()!==Number(year)) return; if(d.getMonth()+1!==Number(month)) return; const dayOfMonth=d.getDate(); const weekNo=dayOfMonth<=7?1:dayOfMonth<=14?2:dayOfMonth<=21?3:4; if(weekNo!==Number(week)) return; label=labels[(d.getDay()+6)%7]; }
-      if(type==="monthly"){ if(!year||!month) return; if(d.getFullYear()!==Number(year)) return; if(d.getMonth()+1!==Number(month)) return; const dayOfMonth=d.getDate(); label=dayOfMonth<=7?labels[0]:dayOfMonth<=14?labels[1]:dayOfMonth<=21?labels[2]:labels[3]; }
-      if(type==="quarterly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; const mi=d.getMonth(); label=mi<3?labels[0]:mi<6?labels[1]:mi<9?labels[2]:labels[3]; }
-      if(type==="yearly"){ if(!year) return; if(d.getFullYear()!==Number(year)) return; label=labels[d.getMonth()]; }
-      if(type==="range"){ if(d<rangeStart||d>rangeEnd) return; label=d.toISOString().slice(0,10); }
-      if(!label) return; if(!buckets[label]) buckets[label]={};
-      Object.keys(data).forEach(key => {
-  // Include m_ prefixed keys AND app_count
-  if (key.startsWith("m_") || key === "app_count") {
-    buckets[label][key] = (buckets[label][key]||0) + toNumber(data[key]);
-  }
-});
+      records.forEach(r => {
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+        const d = new Date(data.datecheck || r.createdAt);
+
+        if(d.toDateString() !== targetDate.toDateString()) return;
+
+        const hour = d.getHours().toString().padStart(2,"0");
+
+        if(!latestHourlyRecords[hour] || new Date(r.createdAt) > new Date(latestHourlyRecords[hour].createdAt)) {
+          latestHourlyRecords[hour] = r;
+        }
+      });
+
+      Object.keys(latestHourlyRecords).forEach(hour => {
+        const r = latestHourlyRecords[hour];
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+
+        if(!buckets[hour]) buckets[hour] = {};
+
+        Object.keys(data).forEach(key => {
+          // Only include mobile keys
+          if(key.startsWith("m_") || key === "app_count") {
+            buckets[hour][key] = toNumber(data[key]); // ❌ No sum
+          }
+        });
+      });
+    } else {
+      // Weekly/monthly/yearly/range aggregation
+      records.forEach(r => {
+        const parsed = JSON.parse(r.data);
+        const data = parsed.data || {};
+        const d = new Date(data.datecheck || r.createdAt);
+        let label;
+
+        if(type==="weekly"){
+          if(!year||!month||!week) return;
+          if(d.getFullYear()!==Number(year)) return;
+          if(d.getMonth()+1!==Number(month)) return;
+          const dayOfMonth = d.getDate();
+          const weekNo = dayOfMonth <=7 ? 1 : dayOfMonth <=14 ? 2 : dayOfMonth <=21 ? 3 : 4;
+          if(weekNo !== Number(week)) return;
+          label = labels[(d.getDay()+6)%7];
+        }
+        if(type==="monthly"){
+          if(!year||!month) return;
+          if(d.getFullYear()!==Number(year)) return;
+          if(d.getMonth()+1!==Number(month)) return;
+          const dayOfMonth = d.getDate();
+          label = dayOfMonth <=7 ? labels[0] : dayOfMonth <=14 ? labels[1] : dayOfMonth <=21 ? labels[2] : labels[3];
+        }
+        if(type==="quarterly"){
+          if(!year) return;
+          if(d.getFullYear()!==Number(year)) return;
+          const mi = d.getMonth();
+          label = mi<3 ? labels[0] : mi<6 ? labels[1] : mi<9 ? labels[2] : labels[3];
+        }
+        if(type==="yearly"){
+          if(!year) return;
+          if(d.getFullYear()!==Number(year)) return;
+          label = labels[d.getMonth()];
+        }
+        if(type==="range"){
+          if(d<rangeStart || d>rangeEnd) return;
+          label = d.toISOString().slice(0,10);
+        }
+
+        if(!label) return;
+        if(!buckets[label]) buckets[label]={};
+
+        Object.keys(data).forEach(key => {
+          if(key.startsWith("m_") || key === "app_count") {
+            buckets[label][key] = (buckets[label][key]||0) + toNumber(data[key]);
+          }
+        });
+      });
+    }
+
+    // Build series
+    const series = {};
+    labels.forEach(label => { 
+      const metrics = buckets[label] || {}; 
+      Object.keys(metrics).forEach(metric => { if(!series[metric]) series[metric]=[]; }); 
+    });
+    Object.keys(series).forEach(metric => { 
+      series[metric] = labels.map(l => buckets[l]?.[metric] || 0); 
     });
 
-    const series={};
-    labels.forEach(label=>{ const metrics=buckets[label]||{}; Object.keys(metrics).forEach(metric=>{ if(!series[metric]) series[metric]=[]; }); });
-    Object.keys(series).forEach(metric=>{ series[metric] = labels.map(l=>buckets[l]?.[metric]||0); });
+    const lastRecord = records[records.length-1];
+    const parsedLast = JSON.parse(lastRecord.data);
 
-    const lastRecord=records[records.length-1];
-    const parsedLast=JSON.parse(lastRecord.data);
- if(type=='daily'){
- res.json({status:true,
-       labels, series, 
-       hours,
-       individualExecutionTime:parsedLast.individualExecutionTime||{},
-        ExecutionTime:parsedLast.ExecutionTime||null,
-         createdAt:lastRecord.createdAt,
-          updatedAt:lastRecord.updatedAt});
- }
-    res.json({status:true,
-       labels, series, 
-       individualExecutionTime:parsedLast.individualExecutionTime||{},
-        ExecutionTime:parsedLast.ExecutionTime||null,
-         createdAt:lastRecord.createdAt,
-          updatedAt:lastRecord.updatedAt});
+    if(type==='daily'){
+      res.json({
+        status:true,
+        labels,
+        series,
+        hours,
+        individualExecutionTime: parsedLast.individualExecutionTime || {},
+        ExecutionTime: parsedLast.ExecutionTime || null,
+        createdAt: lastRecord.createdAt,
+        updatedAt: lastRecord.updatedAt
+      });
+      return;
+    }
 
-          
+    res.json({
+      status:true,
+      labels,
+      series,
+      individualExecutionTime: parsedLast.individualExecutionTime || {},
+      ExecutionTime: parsedLast.ExecutionTime || null,
+      createdAt: lastRecord.createdAt,
+      updatedAt: lastRecord.updatedAt
+    });
 
   } catch(err){ 
-    res.status(500).json({status:false,message:"Failed to generate Mobile chart report", error:err.message});
+    res.status(500).json({ status:false, message:"Failed to generate Mobile chart report", error:err.message });
   }
 }
+
 ,
 
 async metricBasedChart(req, res) {
