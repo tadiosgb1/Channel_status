@@ -75,7 +75,6 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 //  console.log("startToday",startOfToday)
 let isCronRunning = false;
 
-<<<<<<< HEAD
 cron.schedule("*/2 * * * *", async () => {
   if (isCronRunning) {
     console.log("Previous cron still running, skipping this run");
@@ -98,7 +97,9 @@ cron.schedule("*/2 * * * *", async () => {
     startOfToday.setHours(0, 0, 0, 0);
 
     const lastPastDaily = await Daily_cron_local_report.findOne({
-      where: { createdAt: { [Op.lt]: startOfToday } },
+      where: {
+        createdAt: { [Op.lt]: startOfToday }
+      },
       order: [["createdAt", "DESC"]],
     });
 
@@ -109,21 +110,22 @@ cron.schedule("*/2 * * * *", async () => {
       const pastDateEnd = new Date(pastDateStart);
       pastDateEnd.setHours(23, 59, 59, 999);
 
-      const pastDailyRecords = await Daily_cron_local_report.findAll({
+      // 🔥 DELETE ALL records from that past date
+      await Daily_cron_local_report.destroy({
         where: {
-          createdAt: { [Op.between]: [pastDateStart, pastDateEnd] },
+          createdAt: {
+            [Op.between]: [pastDateStart, pastDateEnd],
+          },
         },
-        order: [["createdAt", "DESC"]],
       });
 
-      if (pastDailyRecords.length > 1) {
-        await Daily_cron_local_report.destroy({
-          where: {
-            id: { [Op.in]: pastDailyRecords.slice(1).map(r => r.id) },
-          },
-        });
-      }
+      console.log(
+        `Daily cleanup: deleted ALL records for ${pastDateStart.toDateString()}`
+      );
     }
+
+
+
 
     // 3️⃣ Cron table create/update today
     const endOfToday = new Date(startOfToday);
@@ -154,8 +156,6 @@ cron.schedule("*/2 * * * *", async () => {
 
 
 
-=======
->>>>>>> d067c6f9508ddc4de8e7756fcb93cf0733fe36d4
 
 
 
