@@ -15,6 +15,7 @@
         </label>
         <input
           v-model="username"
+          autocomplete="username"
           type="text"
           placeholder="Enter your username"
           class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
@@ -29,6 +30,7 @@
         <input
           v-model="password" 
           type="password"
+          autocomplete="current-password"
           placeholder="Enter your password"
           class="w-full h-12 px-4 border border-tertiary rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
         />
@@ -85,6 +87,7 @@ const verifyLogin = async () => {
       localStorage.setItem('username', username.value);
       localStorage.setItem('first_name', res.user?.first_name || '');
       localStorage.setItem('role', res.user?.role || '');
+      localStorage.setItem('id', res.user?.id || '');
       localStorage.setItem('avatar', res.user?.avatar || '');
 
       localStorage.setItem("isAuthenticated", true);

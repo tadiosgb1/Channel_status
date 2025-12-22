@@ -45,8 +45,13 @@
         <tr v-for="(op, index) in mobileAppOps" :key="'m-' + index">
           <td v-if="index === 0"
               :rowspan="mobileAppOps.length"
-              class="px-4 py-2 font-semibold border border-primary">
-            Mobile App
+              class="px-0 py-2 font-semibold border border-primary">
+             <button
+              @click="showAppModal = true"
+              class="hover:bg-primary hover:text-white h-32 w-full rounded-lg transition bg-gray-200 "
+            >
+              Mobile App
+            </button>
           </td>
 
           <td v-if="index === 0"
@@ -65,8 +70,14 @@
         <tr v-for="(op, index) in ussdOps" :key="'u-' + index">
           <td v-if="index === 0"
               :rowspan="ussdOps.length"
-              class="px-4 py-2 font-semibold border border-primary">
-            USSD
+              class="px-0 py-2 font-semibold border border-primary">
+              <button
+                @click="showUssdModal = true"
+                class="hover:bg-primary hover:text-white h-32 w-full rounded-lg transition bg-gray-200 "
+              >
+                USSD
+              </button>
+
           </td>
 
           <td v-if="index === 0"
@@ -99,6 +110,20 @@
       </tbody>
     </table>
 
+    <AppDataModal
+      v-if="showAppModal"
+      :date="formattedDate"
+      @close="showAppModal = false"
+    />
+
+
+      <UssdDataModal
+        v-if="showUssdModal"
+        :report="report"
+        @close="showUssdModal = false"
+      />
+
+
     </div>
   </div>
 </template>
@@ -106,6 +131,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
+import AppDataModal from "@/views/protected/AppDataModal.vue";
+import UssdDataModal from "@/views/protected/UssdDataModal.vue";
+const showAppModal = ref(false);
+const showUssdModal = ref(false);
 
 const loading = ref(true);
 const report = ref({});

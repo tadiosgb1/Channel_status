@@ -1,4 +1,3 @@
-
 const BASE_URL = 'http://localhost:5000/api/'
 const BASE_AVATAR = 'http://localhost:5000/api/v1/images/'
 const BASE_UPLOAD = 'http://localhost:5000/api/v1/uploads/'
