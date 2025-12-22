@@ -265,7 +265,23 @@ async getUssdChartReport(req, res) {
     const { type, date, month, year, week, start, end } = req.query;
     if (!type) return res.status(400).json({ status: false, message: "type is required" });
 
-    const records = await Cron_local_report.findAll({ order: [["id","ASC"]] });
+   let records;
+
+    if (type === "daily") {
+      records = await Daily_cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+
+      console.log("records",records);
+
+    } else {
+      records = await Cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+    }
+
+
+
     if (!records.length)
       return res.json({ status:true, labels:[], series:{}, individualExecutionTime:{}, ExecutionTime:null, createdAt:null, updatedAt:null });
 
@@ -342,7 +358,19 @@ async getMobileChartReport(req, res) {
     const { type, date, month, year, week, start, end } = req.query;
     if(!type) return res.status(400).json({ status:false, message:"type is required" });
 
-    const records = await Cron_local_report.findAll({ order:[["id","ASC"]] });
+    let records;
+
+    if (type == "daily") {
+      records = await Daily_cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+    } else {
+      records = await Cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+    }
+
+
     if(!records.length)
       return res.json({ status:true, labels:[], series:{}, individualExecutionTime:{}, ExecutionTime:null, createdAt:null, updatedAt:null });
 
