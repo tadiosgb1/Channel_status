@@ -69,6 +69,8 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 
 
+
+
 cron.schedule("*/2 * * * *", async () => {
   try {
     console.log("Cron job triggering /api/reports/report");
@@ -112,6 +114,12 @@ cron.schedule("*/2 * * * *", async () => {
 }, {
   timezone: "Africa/Addis_Ababa",
 });
+
+
+
+
+
+
 
 
 
