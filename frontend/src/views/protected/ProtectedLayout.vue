@@ -87,7 +87,7 @@
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-lg"
             @click="showLogoutModal = false"
           >
-            ✖
+            ✖️
           </button>
 
           <h2 class="text-2xl font-bold text-center mb-4 text-gray-800 flex justify-center items-center space-x-2">

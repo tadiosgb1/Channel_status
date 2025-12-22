@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models");
 const Cron_local_report = db.Cron_local_report;
+const Daily_cron_local_report = db.Daily_cron_local_report;
 
 module.exports = {
 
@@ -82,9 +83,17 @@ async getChartReport(req, res) {
       });
     }
 
-    const records = await Cron_local_report.findAll({
-      order: [["id", "ASC"]]
-    });
+    let records;
+
+    if (type == "daily") {
+      records = await Daily_cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+    } else {
+      records = await Cron_local_report.findAll({
+        order: [["id", "ASC"]],
+      });
+    }
 
     if (!records.length) {
       return res.json({ status: true, labels: [], series: {} });

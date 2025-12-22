@@ -14,7 +14,7 @@ async function connectDatabases() {
     if (!oracleConn) {
       oracleConn = await oracledb.getConnection({
         user: process.env.ORACLE_USER,
-        password: "Kid#ussdprod1234",
+        password: process.env.ORACLE_PASS,
         connectString: process.env.ORACLE_CONN,
       });
     }

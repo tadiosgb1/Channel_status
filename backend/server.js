@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cron_local_reportRoutes = require('./routes/cron_local_reportRoutes.js');
+
 const session = require("express-session");
 const cors = require("cors");
 const db = require("./models");
@@ -8,6 +9,7 @@ const axios = require("axios");
 const cron = require("node-cron");
 const {sendEmails} = require("./utils.js")
 const Cron_local_report = db.Cron_local_report;
+const Daily_cron_local_report = db.Daily_cron_local_report;
 // Routes
 const caseRoutes = require('./routes/caseRoutes.js');
 const authRoutes = require("./routes/authRoutes");
@@ -66,6 +68,12 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // }, {
 //   timezone: "Africa/Addis_Ababa"
 // });
+
+
+
+
+
+
 
 
 
