@@ -1,11 +1,11 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen">
+  <div class="p-2 bg-gray-100 min-h-screen">
 
  <!-- Header Card -->
-    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
+    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-md shadow-md flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold   flex items-center">
-          <i class="fa-solid fa-users mr-3"></i>
+        <h1 class="text-lg font-semibold   flex items-center text-gray-600">
+          <i class="fa-solid fa-users mr-3 "></i>
           User Management
         </h1>
       </div>

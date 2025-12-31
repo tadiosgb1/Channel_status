@@ -1,7 +1,7 @@
 <template>
-  <div class="px-6 bg-gray-100 min-h-screen space-y-4"  ref="reportRef">
+  <div class="px-2 bg-gray-100 min-h-screen space-y-4"  ref="reportRef">
     <!-- Header -->
-    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md">
+    <div class="bg-primary/20 border-l-4 border-primary p-2 rounded-md shadow-md">
       <h1 class="text-3xl font-semi ">Channel Status Update</h1>
      <div class="flex justify-between">
        <p class=" font-semibold mt-1">
@@ -45,10 +45,10 @@
         <tr v-for="(op, index) in mobileAppOps" :key="'m-' + index">
           <td v-if="index === 0"
               :rowspan="mobileAppOps.length"
-              class="px-0 py-2 font-semibold border border-primary">
+              class="px-2 py-2 font-semibold border border-primary">
              <button
               @click="showAppModal = true"
-              class="hover:bg-primary hover:text-white h-32 w-full rounded-lg transition bg-gray-200 "
+              class=" hover:bg-gray-400 hover:text-black h-32 w-full rounded-lg transition bg-gray-200 "
             >
               Mobile App
             </button>
@@ -70,10 +70,10 @@
         <tr v-for="(op, index) in ussdOps" :key="'u-' + index">
           <td v-if="index === 0"
               :rowspan="ussdOps.length"
-              class="px-0 py-2 font-semibold border border-primary">
+              class="px-2 py-2 font-semibold border border-primary">
               <button
                 @click="showUssdModal = true"
-                class="hover:bg-primary hover:text-white h-32 w-full rounded-lg transition bg-gray-200 "
+                class="hover:bg-gray-400 hover:text-black h-32 w-full rounded-lg transition bg-gray-200 "
               >
                 USSD
               </button>

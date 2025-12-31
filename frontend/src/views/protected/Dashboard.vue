@@ -1,50 +1,52 @@
 <template>
-  <div class=" bg-gray-50 min-h-screen space-y-8">
+  <div class="bg-gray-50 min-h-screen space-y-8">
 
     <!-- Header + Filters -->
     <div class="bg-white rounded-xl shadow-sm p-6 m-4">
       <div class="flex flex-wrap gap-4 justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-800">Channel Operations Dashboard</h1>
 
-       <div class="flex justify-between">
-        <select name="channel" id="channel" v-model="activeChannel"
-          class="border border-secondary rounded-lg px-4 py-2.5 mr-6 focus:ring-2  focus:ring-primary">
-          <option value="mobile">Mobile App</option>
-          <option value="ussd">USSD</option   > 
-        </select>
-        
-         <div class="flex flex-wrap gap-3 items-center">
-          <select v-model="type" @change="loadDashboard" class="border border-secondary rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-            <option value="yearly">Yearly</option>
-            <option value="range">Date Range</option>
+        <div class="flex justify-between">
+          <select name="channel" id="channel" v-model="activeChannel"
+            class="border border-secondary rounded-lg px-4 py-2.5 mr-6 focus:ring-2 focus:ring-primary">
+            <option value="mobile">Mobile App</option>
+            <option value="ussd">USSD</option>
           </select>
 
-          <select v-if="['weekly','monthly','quarterly','yearly'].includes(type)" v-model="year" @change="loadDashboard"
-            class="border border-gray-300 rounded-lg px-4 py-2.5">
-            <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
-          </select>
+          <div class="flex flex-wrap gap-3 items-center">
+            <select v-model="type" @change="loadDashboard"
+              class="border border-secondary rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="yearly">Yearly</option>
+              <option value="range">Date Range</option>
+            </select>
 
-          <select v-if="['weekly','monthly'].includes(type)" v-model="month" @change="loadDashboard"
-            class="border border-gray-300 rounded-lg px-4 py-2.5">
-            <option v-for="m in 12" :key="m" :value="m">{{ monthNames[m - 1] }}</option>
-          </select>
+            <select v-if="['weekly','monthly','quarterly','yearly'].includes(type)" v-model="year" @change="loadDashboard"
+              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+            </select>
 
-          <select v-if="type === 'weekly'" v-model="week" @change="loadDashboard"
-            class="border border-gray-300 rounded-lg px-4 py-2.5">
-            <option v-for="w in 5" :key="w" :value="w">Week {{ w }}</option>
-          </select>
+            <select v-if="['weekly','monthly'].includes(type)" v-model="month" @change="loadDashboard"
+              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              <option v-for="m in 12" :key="m" :value="m">{{ monthNames[m - 1] }}</option>
+            </select>
 
-          <div v-if="type === 'range'" class="flex gap-3">
-            <input type="date" v-model="start" @change="loadDashboard" class="border border-gray-300 rounded-lg px-4 py-2.5" />
-            <input type="date" v-model="end" @change="loadDashboard" class="border border-gray-300 rounded-lg px-4 py-2.5" />
+            <select v-if="type === 'weekly'" v-model="week" @change="loadDashboard"
+              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              <option v-for="w in 5" :key="w" :value="w">Week {{ w }}</option>
+            </select>
+
+            <div v-if="type === 'range'" class="flex gap-3">
+              <input type="date" v-model="start" @change="loadDashboard"
+                class="border border-gray-300 rounded-lg px-4 py-2.5" />
+              <input type="date" v-model="end" @change="loadDashboard"
+                class="border border-gray-300 rounded-lg px-4 py-2.5" />
+            </div>
           </div>
         </div>
-
-       </div>
       </div>
     </div>
 
@@ -54,35 +56,16 @@
 
     <!-- Main Tabs: Mobile vs USSD -->
     <div v-else class="w-full">
-     
-
-      <!-- Channel Content (Full Width) -->
+      <!-- Channel Content -->
       <div class="mt-8">
         <!-- Mobile App Tab -->
         <div v-show="activeChannel === 'mobile'">
-          <!-- Sub-tabs: Counts vs Amounts -->
           <div class="border-b border-gray-200 mb-8">
             <nav class="flex space-x-6">
-              <button
-                @click="mobileTab = 'counts'"
-                :class="[
-                  'py-3 px-1 border-b-2 font-medium text-base',
-                  mobileTab === 'counts'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary '
-                ]"
-              >
+              <button @click="mobileTab = 'counts'" :class="tabClass(mobileTab, 'counts')">
                 Transaction Counts
               </button>
-              <button
-                @click="mobileTab = 'amounts'"
-                :class="[
-                  'py-3 px-1 border-b-2 font-medium text-base',
-                  mobileTab === 'amounts'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary'
-                ]"
-              >
+              <button @click="mobileTab = 'amounts'" :class="tabClass(mobileTab, 'amounts')">
                 Transaction Amounts (ETB)
               </button>
             </nav>
@@ -109,29 +92,12 @@
 
         <!-- USSD Tab -->
         <div v-show="activeChannel === 'ussd'">
-          <!-- Sub-tabs -->
           <div class="border-b border-gray-200 mb-8">
             <nav class="flex space-x-6">
-              <button
-                @click="ussdTab = 'counts'"
-                :class="[
-                  'py-3 px-1 border-b-2 font-medium text-base',
-                  ussdTab === 'counts'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
-                ]"
-              >
+              <button @click="ussdTab = 'counts'" :class="tabClass(ussdTab, 'counts')">
                 Transaction Counts
               </button>
-              <button
-                @click="ussdTab = 'amounts'"
-                :class="[
-                  'py-3 px-1 border-b-2 font-medium text-base',
-                  ussdTab === 'amounts'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
-                ]"
-              >
+              <button @click="ussdTab = 'amounts'" :class="tabClass(ussdTab, 'amounts')">
                 Transaction Amounts (ETB)
               </button>
             </nav>
@@ -164,6 +130,7 @@
 import { ref, computed, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 import VueApexCharts from "vue3-apexcharts";
+
 const api = new ApiService();
 
 const type = ref("daily");
@@ -184,12 +151,13 @@ const ussdTab = ref("counts");
 const error = ref(null);
 const loading = ref(false);
 
-const mobileRaw = ref({ labels: [], series: {} });
-const ussdRaw = ref({ labels: [], series: {} });
+const mobileRaw = ref({ labels: [], hours: [], series: {} });
+const ussdRaw = ref({ labels: [], hours: [], series: {} });
 
 // Colors
 const colors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316"];
 
+// Build query parameters
 const buildQueryParams = () => {
   const params = { type: type.value };
   if (["weekly","monthly","quarterly","yearly"].includes(type.value)) params.year = year.value;
@@ -206,12 +174,13 @@ const buildQueryParams = () => {
   return params;
 };
 
+// Load charts
 const loadMobileChart = async () => {
   const params = buildQueryParams();
   if (!params) return;
   try {
     const res = await api.get("/cron_local_report/app/report", params);
-    mobileRaw.value = { labels: res.labels || [], series: res.series || {} };
+    mobileRaw.value = { labels: res.labels || [], hours: res.hours || [], series: res.series || {} };
   } catch {
     error.value = "Failed to load Mobile App data";
   }
@@ -222,7 +191,7 @@ const loadUssdChart = async () => {
   if (!params) return;
   try {
     const res = await api.get("/cron_local_report/ussd/report", params);
-    ussdRaw.value = { labels: res.labels || [], series: res.series || {} };
+    ussdRaw.value = { labels: res.labels || [], hours: res.hours || [], series: res.series || {} };
   } catch {
     error.value = "Failed to load USSD data";
   }
@@ -235,6 +204,7 @@ const loadDashboard = async () => {
   loading.value = false;
 };
 
+// Clean series name
 const cleanName = (key) => {
   return key
     .replace(/^m_|^u_/, '')
@@ -245,77 +215,68 @@ const cleanName = (key) => {
     .join(' ');
 };
 
-// Shared chart options
-const chartOptions = (labels, yTitle, formatter) => ({
+// Chart options generator
+const chartOptions = (labelsArray, yTitle, formatter) => ({
   chart: { toolbar: { show: true }, fontFamily: 'Inter, sans-serif' },
   colors,
   plotOptions: { bar: { borderRadius: 8, columnWidth: '55%', endingShape: 'rounded' } },
   dataLabels: { enabled: false },
   legend: { position: 'top', horizontalAlign: 'left', fontSize: '14px' },
-  xaxis: { categories: labels, labels: { style: { fontSize: '12px' } } },
+  xaxis: { categories: labelsArray, labels: { style: { fontSize: '12px' } } },
   yaxis: { title: { text: yTitle }, labels: { formatter } },
   tooltip: { shared: true, intersect: false, y: { formatter } },
   grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
 });
 
-// Mobile Counts
-const mobileCountSeries = computed(() => {
-  const keys = Object.keys(mobileRaw.value.series || {}).filter(k => k.includes('_count') && !k.includes('app_count'));
-  return keys.map(key => ({ name: cleanName(key), data: mobileRaw.value.series[key] || [] }));
-});
-const mobileCountOptions = computed(() => chartOptions(
-  mobileRaw.value.labels,
-  'Transaction Count',
-  val => val.toLocaleString()
-));
+// Mobile series
+const mobileCountSeries = computed(() =>
+  Object.keys(mobileRaw.value.series || {})
+    .filter(k => k.includes('_count') && !k.includes('app_count'))
+    .map(k => ({ name: cleanName(k), data: mobileRaw.value.series[k] || [] }))
+);
+const mobileAmountSeries = computed(() =>
+  Object.keys(mobileRaw.value.series || {})
+    .filter(k => k.includes('_sum'))
+    .map(k => ({ name: cleanName(k), data: mobileRaw.value.series[k] || [] }))
+);
 
-// Mobile Amounts
-const mobileAmountSeries = computed(() => {
-  const keys = Object.keys(mobileRaw.value.series || {}).filter(k => k.includes('_sum'));
-  return keys.map(key => ({ name: cleanName(key), data: mobileRaw.value.series[key] || [] }));
-});
-const mobileAmountOptions = computed(() => chartOptions(
-  mobileRaw.value.labels,
-  'Amount (ETB)',
-  val => 'ETB ' + val.toLocaleString(undefined, { maximumFractionDigits: 0 })
-));
+// USSD series
+const ussdCountSeries = computed(() =>
+  Object.keys(ussdRaw.value.series || {})
+    .filter(k => k.includes('_count') && k !== 'ussd_count')
+    .map(k => ({ name: cleanName(k), data: ussdRaw.value.series[k] || [] }))
+);
+const ussdAmountSeries = computed(() =>
+  Object.keys(ussdRaw.value.series || {})
+    .filter(k => k.includes('_sum'))
+    .map(k => ({ name: cleanName(k), data: ussdRaw.value.series[k] || [] }))
+);
 
-// USSD Counts
-// Compute total users separately (ussd_count)
-const totalUssdUsers = computed(() => {
-  const arr = ussdRaw.value.series?.ussd_count || [];
-  return arr.reduce((sum, v) => sum + Number(v || 0), 0);
-});
+// Daily/hourly chart options use hours from API
+const mobileCountOptions = computed(() =>
+  type.value === 'daily' ? chartOptions(mobileRaw.value.hours, 'Transaction Count', v => v.toLocaleString()) 
+                          : chartOptions(mobileRaw.value.labels, 'Transaction Count', v => v.toLocaleString())
+);
+const mobileAmountOptions = computed(() =>
+  type.value === 'daily' ? chartOptions(mobileRaw.value.hours, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString()) 
+                          : chartOptions(mobileRaw.value.labels, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString())
+);
+const ussdCountOptions = computed(() =>
+  type.value === 'daily' ? chartOptions(ussdRaw.value.hours, 'Transaction Count', v => v.toLocaleString()) 
+                          : chartOptions(ussdRaw.value.labels, 'Transaction Count', v => v.toLocaleString())
+);
+const ussdAmountOptions = computed(() =>
+  type.value === 'daily' ? chartOptions(ussdRaw.value.hours, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString()) 
+                          : chartOptions(ussdRaw.value.labels, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString())
+);
 
-// Compute series for chart (exclude 'ussd_count')
-const ussdCountSeries = computed(() => {
-  const keys = Object.keys(ussdRaw.value.series || {}).filter(
-    k => k.includes('_count') && k !== 'ussd_count' // exclude total users
-  );
-  return keys.map(key => ({
-    name: cleanName(key),
-    data: ussdRaw.value.series[key] || []
-  }));
-});
-
-// Chart options
-const ussdCountOptions = computed(() => chartOptions(
-  ussdRaw.value.labels,
-  'Transaction Count',
-  val => val.toLocaleString()
-));
-
-
-// USSD Amounts
-const ussdAmountSeries = computed(() => {
-  const keys = Object.keys(ussdRaw.value.series || {}).filter(k => k.includes('_sum'));
-  return keys.map(key => ({ name: cleanName(key), data: ussdRaw.value.series[key] || [] }));
-});
-const ussdAmountOptions = computed(() => chartOptions(
-  ussdRaw.value.labels,
-  'Amount (ETB)',
-  val => 'ETB ' + val.toLocaleString(undefined, { maximumFractionDigits: 0 })
-));
+// Tab style
+const tabClass = (currentTab, t) => [
+  'py-3 px-1 border-b-2 font-medium text-base',
+  currentTab === t
+    ? 'border-primary text-primary'
+    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary'
+];
 
 onMounted(loadDashboard);
 </script>

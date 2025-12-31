@@ -5,7 +5,7 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
-          USSD – Daily Hourly Report
+          USSD – Daily  Report
         </h2>
         <button
           @click="$emit('close')"
@@ -67,7 +67,7 @@
             : 'bg-gray-100 text-gray-600'"
           class="px-4 py-2 rounded-lg font-medium"
         >
-          Previous
+          Day time
         </button>
 
         <button
@@ -77,7 +77,7 @@
             : 'bg-gray-100 text-gray-600'"
           class="px-4 py-2 rounded-lg font-medium"
         >
-          Next
+          Night
         </button>
       </div>
 

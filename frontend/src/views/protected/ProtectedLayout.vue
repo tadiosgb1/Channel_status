@@ -11,7 +11,7 @@
       <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
-      <header class="mb-2 flex justify-between items-center bg-white p-6 rounded-xl shadow-md">
+      <header class="mb-2 flex justify-between items-center bg-white p-4 bg shadow-md">
 
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
@@ -21,7 +21,7 @@
             class="w-14 h-14 rounded-full border-2 border-primary object-cover"
           />
           <div>
-            <h2 class="text-2xl font-bold text-white">
+            <h2 class="text-2xl font-bold text-gray-800">
               Welcome, {{ user.first_name }}
             </h2>
             <p class="text-gray-500 text-sm capitalize">
@@ -66,7 +66,7 @@
       </header>
 
       <!-- Nested Routes -->
-      <main class="p-6">
+      <main class="p-0">
         <router-view />
       </main>
 

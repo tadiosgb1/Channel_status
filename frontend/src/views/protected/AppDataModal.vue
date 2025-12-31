@@ -5,7 +5,7 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-primary">
-          Mobile App – Daily Report (Hourly)
+          Mobile App – Daily Report 
         </h2>
         <button @click="$emit('close')" class="text-gray-500 hover:text-red-500 text-xl">
           ✕
@@ -68,7 +68,7 @@
             : 'bg-gray-100 text-gray-600'"
           class="px-4 py-2 rounded-lg font-medium"
         >
-          Privious
+          Day time
         </button>
 
         <button
@@ -78,7 +78,7 @@
             : 'bg-gray-100 text-gray-600'"
           class="px-4 py-2 rounded-lg font-medium"
         >
-          Next 
+          Night 
         </button>
     
       </div>

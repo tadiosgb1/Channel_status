@@ -9,6 +9,7 @@
       </h1>
 
       <button
+      
         @click="openModal()"
         class="flex items-center bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary/80 transition shadow"
       >
