@@ -6,50 +6,85 @@ module.exports = {
   // GET /api/cases
   async getAll(req, res) {
     try {
+      console.log("req",req.body)
       let page = parseInt(req.query.page) || 1;
       let page_size = parseInt(req.query.page_size) || 10;
       let search = req.query.search || "";
       let ordering = req.query.ordering || "id";
-      let status = req.query.status || "all"; // new: filter by status
+      let status = req.query.status || "all";
+
+      // ✅ UPDATED: date filters
+      const {
+        created_from,
+        created_to,
+        updated_from,
+        updated_to
+      } = req.query;
 
       if (page < 1) page = 1;
       if (page_size < 1) page_size = 10;
 
-      // Search conditions
-      const searchableFields = ["case_title", "description"];
-      const searchConditions = searchableFields.map(field => ({
-        [field]: { [Op.like]: "%" + search + "%" }
-      }));
-      const where = search ? { [Op.or]: searchConditions } : {};
+      // ✅ UPDATED: where condition builder
+      const where = {};
 
-      // Status filter
-      if (status === "pending") {
-        where.status = "pending";
-      } else if (status === "resolved") {
-        where.status = "resolved";
-      } // else "all" -> no filter
+      // 🔍 Search
+      if (search) {
+        where[Op.or] = [
+          { case_title: { [Op.like]: `%${search}%` } },
+          { description: { [Op.like]: `%${search}%` } }
+        ];
+      }
+
+      // 📌 Status filter
+      if (status === "pending" || status === "resolved") {
+        where.status = status;
+      }
+
+      // 📅 Created At filter
+      if (created_from || created_to) {
+        where.createdAt = {};
+        if (created_from) {
+          where.createdAt[Op.gte] = new Date(created_from);
+        }
+        if (created_to) {
+          where.createdAt[Op.lte] = new Date(created_to);
+        }
+      }
+
+      // 📅 Updated At filter
+      if (updated_from || updated_to) {
+        where.updatedAt = {};
+        if (updated_from) {
+          where.updatedAt[Op.gte] = new Date(updated_from);
+        }
+        if (updated_to) {
+          where.updatedAt[Op.lte] = new Date(updated_to);
+        }
+      }
 
       // Ordering & pagination
       const order = ordering.startsWith("-")
         ? [[ordering.slice(1), "DESC"]]
         : [[ordering, "ASC"]];
+
       const offset = (page - 1) * page_size;
 
-      const include = [db.User].filter(Boolean);
-      const findOptions = { where, order, offset, limit: page_size };
-      if (include.length) findOptions.include = include;
+      const findOptions = {
+        where,
+        order,
+        offset,
+        limit: page_size,
+        include: [db.User]
+      };
 
       const { rows, count } = await Case.findAndCountAll(findOptions);
 
       const total_pages = Math.ceil(count / page_size);
-      const baseUrl = `${req.protocol}://${req.get("host")}${req.path}`;
 
       res.json({
         count,
         total_pages,
         current_page: page,
-        next: page < total_pages ? `${baseUrl}?page=${page + 1}&page_size=${page_size}` : null,
-        previous: page > 1 ? `${baseUrl}?page=${page - 1}&page_size=${page_size}` : null,
         page_size,
         data: rows
       });
