@@ -1,130 +1,144 @@
 <template>
-  <div class="px-2 bg-gray-100 min-h-screen space-y-4"  ref="reportRef">
-    <!-- Header -->
-    <div class="bg-primary/20 border-l-4 border-primary p-2 rounded-md shadow-md">
-      <h1 class="text-3xl font-semi ">Channel Status Update</h1>
-     <div class="flex justify-between">
-       <p class=" font-semibold mt-1">
-        Report from: <span class="text-primary">{{ formatDate(report.datecheck) }}</span> <span class="text-green-500">--</span> <span class="text-[#0f3c50]">{{ formatDate(getDate) }}</span>
-      </p>
-      <!-- <button 
-        @click="copyPage"
-        class="mb-4 px-4 py-2 bg-primary text-white rounded-lg shadow"
-      >
-        Copy Report
-      </button> -->
-     </div>
+  <div class="px-6 py-8 bg-white min-h-screen text-slate-800 font-sans" ref="reportRef">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 pb-6 border-b-2 border-primary/10">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight text-primary">Channel Status Update</h1>
+        <p class="text-slate-500 mt-1 flex items-center gap-2 text-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Live Report: <span class="font-bold text-secondary">{{ formatDate(report.datecheck) }}</span> 
+          <span class="text-slate-300 mx-2">—</span> 
+          <span class="font-bold text-secondary">{{ formatDate(getDate) }}</span>
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button @click="getReport" class="px-5 py-2.5 bg-secondary text-white font-bold rounded-xl transition hover:opacity-90 shadow-lg shadow-secondary/20 text-sm uppercase tracking-wider">
+          Refresh Data
+        </button>
+      </div>
     </div>
 
-    <!-- Loading Spinner -->
-    <div v-if="loading" class="flex justify-center items-center h-64">
-      <svg class="animate-spin h-18 w-18 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-      </svg>
-      <span class="ml-2 text-gray-500 font-semibold">Loading Reports...</span>
+    <div v-if="loading" class="flex flex-col justify-center items-center h-64">
+      <div class="relative w-16 h-16">
+        <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-tertiary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <span class="mt-4 text-tertiary font-bold tracking-widest uppercase text-xs">Synchronizing...</span>
     </div>
 
-    <!-- Channels Table -->
-<div class="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
-  <table class="min-w-full border-collapse bg-white">
-      <thead class="bg-secondary text-white">
-        <tr>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Channel</th>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Total Users</th>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Operation</th>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Transactions</th>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Amount</th>
-          <th class="px-4 py-3 text-left text-sm font-medium uppercase border border-primary">Status</th>
-        </tr>
-      </thead>
-
-      <tbody class="bg-white">
-
-        <!-- MOBILE APP -->
-        <tr v-for="(op, index) in mobileAppOps" :key="'m-' + index">
-          <td v-if="index === 0"
-              :rowspan="mobileAppOps.length"
-              class="px-2 py-2 font-semibold border border-primary">
-             <button
-              @click="showAppModal = true"
-              class=" hover:bg-gray-400 hover:text-black h-32 w-full rounded-lg transition bg-gray-200 "
-            >
-              Mobile App
+    <div v-else class="space-y-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="bg-white border-t-4 border-primary rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-xl hover:shadow-primary/5">
+          <div class="p-6 flex justify-between items-center bg-primary/[0.03]">
+            <div>
+              <h2 class="text-xs font-black text-primary uppercase tracking-[0.2em]">Mobile App</h2>
+              <p class="text-4xl font-black text-slate-900 mt-1 italic">
+                {{ report.app_count || 0 }} <span class="text-xs text-slate-400 font-bold not-italic uppercase tracking-normal">Users</span>
+              </p>
+            </div>
+            <button @click="showAppModal = true" class="p-4 bg-primary text-white rounded-2xl shadow-lg shadow-primary/30 hover:-translate-y-1 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
             </button>
-          </td>
+          </div>
+          <div class="overflow-x-auto p-4">
+            <table class="w-full text-left text-sm">
+              <thead class="text-slate-400">
+                <tr>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest">Operation</th>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest text-right">Amount</th>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+                <tr v-for="op in mobileAppOps" :key="op.name" class="group hover:bg-primary/[0.02]">
+                  <td class="px-4 py-4 font-bold text-slate-700 group-hover:text-primary transition-colors">{{ op.name }}</td>
+                  <td class="px-4 py-4 font-mono text-right text-slate-900 font-black">{{ formatNumber(op.sum) }}</td>
+                  <td class="px-4 py-4 text-center">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 font-black text-[10px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> UP
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-          <td v-if="index === 0"
-              :rowspan="mobileAppOps.length"
-              class="px-4 py-2 font-semibold border border-primary">
-            {{ report.app_count }}
-          </td>
+        <div class="bg-white border-t-4 border-secondary rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-xl hover:shadow-secondary/5">
+          <div class="p-6 flex justify-between items-center bg-secondary/[0.03]">
+            <div>
+              <h2 class="text-xs font-black text-secondary uppercase tracking-[0.2em]">USSD Channel</h2>
+              <p class="text-4xl font-black text-slate-900 mt-1 italic">
+                {{ report.ussd_count || 0 }} <span class="text-xs text-slate-400 font-bold not-italic uppercase tracking-normal">Users</span>
+              </p>
+            </div>
+            <button @click="showUssdModal = true" class="p-4 bg-secondary text-white rounded-2xl shadow-lg shadow-secondary/30 hover:-translate-y-1 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+          </div>
+          <div class="overflow-x-auto p-4">
+            <table class="w-full text-left text-sm">
+              <thead class="text-slate-400">
+                <tr>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest">Operation</th>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest text-right">Amount</th>
+                  <th class="px-4 py-3 font-bold uppercase text-[10px] tracking-widest text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+                <tr v-for="op in ussdOps" :key="op.name" class="group hover:bg-secondary/[0.02]">
+                  <td class="px-4 py-4 font-bold text-slate-700 group-hover:text-secondary transition-colors">{{ op.name }}</td>
+                  <td class="px-4 py-4 font-mono text-right text-slate-900 font-black">{{ formatNumber(op.sum) }}</td>
+                  <td class="px-4 py-4 text-center">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 font-black text-[10px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> UP
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-          <td class="px-4 py-2 border border-primary">{{ op.name }}</td>
-          <td class="px-4 py-2 border border-primary">{{ op.count }}</td>
-          <td class="px-4 py-2 border border-primary">{{ formatNumber(op.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">{{ op.status }}</td>
-        </tr>
+      <div class="bg-tertiary rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl group-hover:bg-white/20 transition-all duration-700"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div class="flex items-center gap-6">
+            <div class="p-5 bg-white text-tertiary rounded-[1.5rem] shadow-xl shadow-black/10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-secondary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Internal Transfer Sum</p>
+              <h3 class="text-secondary text-2xl font-black uppercase italic">Consolidated Channel View</h3>
+            </div>
+          </div>
+          
+          <div class="bg-black/10 backdrop-blur-md px-10 py-6 rounded-[2rem] border border-white/10 flex items-baseline gap-6">
+             <p class="text-blacktext-[10px] font-bold uppercase tracking-widest">Total Amount</p>
+             <p class="text-5xl font-mono font-black text-black tracking-tighter">{{ formatNumber(internalTransfer.sum) }}</p>
+          </div>
 
-        <!-- USSD -->
-        <tr v-for="(op, index) in ussdOps" :key="'u-' + index">
-          <td v-if="index === 0"
-              :rowspan="ussdOps.length"
-              class="px-2 py-2 font-semibold border border-primary">
-              <button
-                @click="showUssdModal = true"
-                class="hover:bg-gray-400 hover:text-black h-32 w-full rounded-lg transition bg-gray-200 "
-              >
-                USSD
-              </button>
-
-          </td>
-
-          <td v-if="index === 0"
-              :rowspan="ussdOps.length"
-              class="px-4 py-2 font-semibold border border-primary">
-            {{ report.ussd_count }}
-          </td>
-
-          <td class="px-4 py-2 border border-primary">{{ op.name }}</td>
-          <td class="px-4 py-2 border border-primary">{{ op.count }}</td>
-          <td class="px-4 py-2 border border-primary">{{ formatNumber(op.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">{{ op.status }}</td>
-        </tr>
-
-        <!-- INTERNAL TRANSFER -->
-        <tr>
-          <td class="px-4 py-2 font-semibold border border-primary">USSD + Mobile</td>
-          <td class="px-4 py-2 border border-primary">-</td>
-          <td class="px-4 py-2 border border-primary">Internal Transfer</td>
-          <td class="px-4 py-2 border border-primary">{{ internalTransfer.count }}</td>
-          <td class="px-4 py-2 border border-primary">{{ formatNumber(internalTransfer.sum) }}</td>
-          <td class="px-4 py-2 border border-primary text-green-600 font-semibold">UP</td>
-        </tr>
-
-        <!-- INTERNET/OBDX -->
-        <tr>
-          <td class="px-4 py-2 font-semibold border border-primary">Internet/OBDX</td>
-          <td class="px-4 py-2 border border-primary" colspan="5"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <AppDataModal
-      v-if="showAppModal"
-      :date="formattedDate"
-      @close="showAppModal = false"
-    />
-
-
-      <UssdDataModal
-        v-if="showUssdModal"
-        :report="report"
-        @close="showUssdModal = false"
-      />
-
-
+          <div class="flex flex-col items-center md:items-end">
+             <div class="bg-white px-4 py-1 rounded-full text-[10px] font-black text-tertiary tracking-widest uppercase mb-3">
+              Operational
+             </div>
+             <p class="text-black/40 text-[9px] font-mono tracking-tighter">AUTHENTICATED SECURE SESSION</p>
+          </div>
+        </div>
+      </div>
     </div>
+    
+    <AppDataModal v-if="showAppModal" :date="formattedDate" @close="showAppModal = false" />
+    <UssdDataModal v-if="showUssdModal" :report="report" @close="showUssdModal = false" />
   </div>
 </template>
 

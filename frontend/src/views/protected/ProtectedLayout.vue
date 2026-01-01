@@ -11,7 +11,7 @@
       <div class="lg:hidden h-14"></div>
 
       <!-- Header Card -->
-      <header class="mb-2 flex justify-between items-center bg-white p-4 bg shadow-md">
+      <header class="mb-2 flex justify-between items-center bg-white p-4 bg shadow-md px-8 border-b border-tertiary">
 
         <div class="flex items-center space-x-4">
           <!-- Avatar -->
@@ -66,7 +66,7 @@
       </header>
 
       <!-- Nested Routes -->
-      <main class="p-0">
+      <main class="px-8">
         <router-view />
       </main>
 

@@ -1,124 +1,108 @@
 <template>
-  <div class="bg-gray-50 min-h-screen space-y-8">
+  <div class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans text-slate-900">
+    <div class="max-w-[1600px] mx-auto space-y-8">
+      
+      <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Header + Filters -->
-    <div class="bg-white rounded-xl shadow-sm p-6 m-4">
-      <div class="flex flex-wrap gap-4 justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">Channel Operations Dashboard</h1>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+          <div>
+            <h1 class="text-3xl font-black text-slate-800 uppercase tracking-tight italic">
+              Channels <span class="text-primary font-light">Status</span> Dashboard
+            </h1>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] mt-1">Live Transaction Monitoring Hub</p>
+          </div>
 
-        <div class="flex justify-between">
-          <select name="channel" id="channel" v-model="activeChannel"
-            class="border border-secondary rounded-lg px-4 py-2.5 mr-6 focus:ring-2 focus:ring-primary">
-            <option value="mobile">Mobile App</option>
-            <option value="ussd">USSD</option>
-          </select>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button @click="activeChannel = 'mobile'; loadDashboard()" 
+                :class="activeChannel === 'mobile' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'"
+                class="px-5 py-2 rounded-lg text-xs font-black uppercase transition-all">Mobile App</button>
+              <button @click="activeChannel = 'ussd'; loadDashboard()" 
+                :class="activeChannel === 'ussd' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'"
+                class="px-5 py-2 rounded-lg text-xs font-black uppercase transition-all">USSD</button>
+            </div>
 
-          <div class="flex flex-wrap gap-3 items-center">
-            <select v-model="type" @change="loadDashboard"
-              class="border border-secondary rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary">
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
-              <option value="range">Date Range</option>
-            </select>
+            <div class="relative group">
+              <select v-model="type" @change="loadDashboard"
+                class="appearance-none bg-white border border-slate-200 rounded-xl px-5 py-2.5 pr-10 text-xs font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</div>
+            </div>
 
             <select v-if="['weekly','monthly','quarterly','yearly'].includes(type)" v-model="year" @change="loadDashboard"
-              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm outline-none">
               <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
             </select>
 
             <select v-if="['weekly','monthly'].includes(type)" v-model="month" @change="loadDashboard"
-              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm outline-none">
               <option v-for="m in 12" :key="m" :value="m">{{ monthNames[m - 1] }}</option>
             </select>
 
             <select v-if="type === 'weekly'" v-model="week" @change="loadDashboard"
-              class="border border-gray-300 rounded-lg px-4 py-2.5">
+              class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm outline-none">
               <option v-for="w in 5" :key="w" :value="w">Week {{ w }}</option>
             </select>
 
-            <div v-if="type === 'range'" class="flex gap-3">
-              <input type="date" v-model="start" @change="loadDashboard"
-                class="border border-gray-300 rounded-lg px-4 py-2.5" />
-              <input type="date" v-model="end" @change="loadDashboard"
-                class="border border-gray-300 rounded-lg px-4 py-2.5" />
+            <div v-if="type === 'range'" class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <input type="date" v-model="start" @change="loadDashboard" class="bg-transparent border-none text-[11px] font-bold p-1 px-2 outline-none" />
+              <span class="text-slate-300">|</span>
+              <input type="date" v-model="end" @change="loadDashboard" class="bg-transparent border-none text-[11px] font-bold p-1 px-2 outline-none" />
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Error / Loading -->
-    <div v-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg font-medium">{{ error }}</div>
-    <div v-if="loading" class="text-center text-gray-600 font-medium py-12">Loading dashboard data...</div>
-
-    <!-- Main Tabs: Mobile vs USSD -->
-    <div v-else class="w-full">
-      <!-- Channel Content -->
-      <div class="mt-8">
-        <!-- Mobile App Tab -->
-        <div v-show="activeChannel === 'mobile'">
-          <div class="border-b border-gray-200 mb-8">
-            <nav class="flex space-x-6">
-              <button @click="mobileTab = 'counts'" :class="tabClass(mobileTab, 'counts')">
-                Transaction Counts
-              </button>
-              <button @click="mobileTab = 'amounts'" :class="tabClass(mobileTab, 'amounts')">
-                Transaction Amounts (ETB)
-              </button>
-            </nav>
-          </div>
-
-          <!-- Mobile Counts Chart -->
-          <div v-if="mobileTab === 'counts'" class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h2 class="text-2xl font-semibold text-gray-800">Mobile App - Transaction Counts</h2>
-              <p class="text-sm text-gray-500 mt-2">Number of operations per hour/day across all services</p>
-            </div>
-            <apexchart type="bar" height="550" :options="mobileCountOptions" :series="mobileCountSeries" />
-          </div>
-
-          <!-- Mobile Amounts Chart -->
-          <div v-if="mobileTab === 'amounts'" class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h2 class="text-2xl font-semibold text-gray-800">Mobile App - Transaction Amounts (ETB)</h2>
-              <p class="text-sm text-gray-500 mt-2">Total monetary value transacted per hour/day</p>
-            </div>
-            <apexchart type="bar" height="550" :options="mobileAmountOptions" :series="mobileAmountSeries" />
-          </div>
+      <div class="space-y-6">
+        <div v-if="error" class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-xl flex items-center gap-3">
+          <span class="font-black">ERROR:</span> {{ error }}
         </div>
 
-        <!-- USSD Tab -->
-        <div v-show="activeChannel === 'ussd'">
-          <div class="border-b border-gray-200 mb-8">
-            <nav class="flex space-x-6">
-              <button @click="ussdTab = 'counts'" :class="tabClass(ussdTab, 'counts')">
-                Transaction Counts
+        <div v-if="loading" class="bg-white rounded-[2rem] h-[600px] flex flex-col items-center justify-center border border-slate-200">
+          <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p class="text-slate-400 font-black tracking-widest uppercase animate-pulse">Syncing Channel Data...</p>
+        </div>
+
+        <div v-else class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden">
+          <div class="px-10 pt-10 pb-6 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-slate-50">
+            <div class="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <button @click="tab = 'counts'" :class="tab === 'counts' ? 'bg-white text-primary shadow-md scale-[1.02]' : 'text-slate-500 hover:text-slate-700'"
+                class="px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300">
+                Tx Counts
               </button>
-              <button @click="ussdTab = 'amounts'" :class="tabClass(ussdTab, 'amounts')">
-                Transaction Amounts (ETB)
+              <button @click="tab = 'amounts'" :class="tab === 'amounts' ? 'bg-white text-primary shadow-md scale-[1.02]' : 'text-slate-500 hover:text-slate-700'"
+                class="px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300">
+                Amounts
               </button>
-            </nav>
+            </div>
+
+            <div v-if="type === 'daily'" class="flex items-center gap-1 bg-slate-800 p-1.5 rounded-full shadow-lg">
+              <button @click="timeRange = 'day'" :class="timeRange === 'day' ? 'bg-yellow-400 text-slate-900 shadow-sm' : 'text-white/40 hover:text-white'"
+                class="p-2.5 rounded-full transition-all">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+              </button>
+              <button @click="timeRange = 'night'" :class="timeRange === 'night' ? 'bg-indigo-500 text-white shadow-sm' : 'text-white/40 hover:text-white'"
+                class="p-2.5 rounded-full transition-all">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+              </button>
+            </div>
           </div>
 
-          <!-- USSD Counts Chart -->
-          <div v-if="ussdTab === 'counts'" class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h2 class="text-2xl font-semibold text-gray-800">USSD - Transaction Counts</h2>
-              <p class="text-sm text-gray-500 mt-2">Number of operations per hour/day across all services</p>
+          <div class="p-10">
+            <div class="bg-slate-50/50 rounded-[2.5rem] p-8 border border-slate-100 shadow-inner">
+              <apexchart
+                type="bar"
+                height="520"
+                :options="chartOptions"
+                :series="chartSeries"
+              />
             </div>
-            <apexchart type="bar" height="550" :options="ussdCountOptions" :series="ussdCountSeries" />
-          </div>
-
-          <!-- USSD Amounts Chart -->
-          <div v-if="ussdTab === 'amounts'" class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h2 class="text-2xl font-semibold text-gray-800">USSD - Transaction Amounts (ETB)</h2>
-              <p class="text-sm text-gray-500 mt-2">Total monetary value transacted per hour/day</p>
-            </div>
-            <apexchart type="bar" height="550" :options="ussdAmountOptions" :series="ussdAmountSeries" />
           </div>
         </div>
       </div>
@@ -133,150 +117,167 @@ import VueApexCharts from "vue3-apexcharts";
 
 const api = new ApiService();
 
+/* ================= STATE ================= */
+const activeChannel = ref("mobile");
 const type = ref("daily");
+const tab = ref("counts");
+const timeRange = ref("day");
+
 const year = ref(new Date().getFullYear());
 const month = ref(new Date().getMonth() + 1);
 const week = ref(1);
 const start = ref("");
 const end = ref("");
 
-const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-// Tab states
-const activeChannel = ref("mobile");
-const mobileTab = ref("counts");
-const ussdTab = ref("counts");
-
-const error = ref(null);
 const loading = ref(false);
+const error = ref(null);
 
-const mobileRaw = ref({ labels: [], hours: [], series: {} });
-const ussdRaw = ref({ labels: [], hours: [], series: {} });
+/* ================= CONST ================= */
+const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+const monthNames = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
 
-// Colors
-const colors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316"];
-
-// Build query parameters
-const buildQueryParams = () => {
-  const params = { type: type.value };
-  if (["weekly","monthly","quarterly","yearly"].includes(type.value)) params.year = year.value;
-  if (["weekly","monthly"].includes(type.value)) params.month = month.value;
-  if (type.value === "weekly") params.week = week.value;
-  if (type.value === "range") {
-    if (!start.value || !end.value) {
-      error.value = "Please select both start and end dates";
-      return null;
-    }
-    params.start = start.value;
-    params.end = end.value;
-  }
-  return params;
-};
-
-// Load charts
-const loadMobileChart = async () => {
-  const params = buildQueryParams();
-  if (!params) return;
-  try {
-    const res = await api.get("/cron_local_report/app/report", params);
-    mobileRaw.value = { labels: res.labels || [], hours: res.hours || [], series: res.series || {} };
-  } catch {
-    error.value = "Failed to load Mobile App data";
-  }
-};
-
-const loadUssdChart = async () => {
-  const params = buildQueryParams();
-  if (!params) return;
-  try {
-    const res = await api.get("/cron_local_report/ussd/report", params);
-    ussdRaw.value = { labels: res.labels || [], hours: res.hours || [], series: res.series || {} };
-  } catch {
-    error.value = "Failed to load USSD data";
-  }
-};
-
-const loadDashboard = async () => {
-  loading.value = true;
-  error.value = null;
-  await Promise.all([loadMobileChart(), loadUssdChart()]);
-  loading.value = false;
-};
-
-// Clean series name
-const cleanName = (key) => {
-  return key
-    .replace(/^m_|^u_/, '')
-    .replace(/_count|_sum$/, '')
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-};
-
-// Chart options generator
-const chartOptions = (labelsArray, yTitle, formatter) => ({
-  chart: { toolbar: { show: true }, fontFamily: 'Inter, sans-serif' },
-  colors,
-  plotOptions: { bar: { borderRadius: 8, columnWidth: '55%', endingShape: 'rounded' } },
-  dataLabels: { enabled: false },
-  legend: { position: 'top', horizontalAlign: 'left', fontSize: '14px' },
-  xaxis: { categories: labelsArray, labels: { style: { fontSize: '12px' } } },
-  yaxis: { title: { text: yTitle }, labels: { formatter } },
-  tooltip: { shared: true, intersect: false, y: { formatter } },
-  grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
+/* ================= RAW DATA ================= */
+const raw = ref({
+  labels: [],
+  hours: [],
+  series: {},
 });
 
-// Mobile series
-const mobileCountSeries = computed(() =>
-  Object.keys(mobileRaw.value.series || {})
-    .filter(k => k.includes('_count') && !k.includes('app_count'))
-    .map(k => ({ name: cleanName(k), data: mobileRaw.value.series[k] || [] }))
-);
-const mobileAmountSeries = computed(() =>
-  Object.keys(mobileRaw.value.series || {})
-    .filter(k => k.includes('_sum'))
-    .map(k => ({ name: cleanName(k), data: mobileRaw.value.series[k] || [] }))
+/* ================= HELPERS ================= */
+const cleanName = (k) =>
+  k.replace(/^m_|^u_/, "")
+   .replace(/_count|_sum$/, "")
+   .replace(/_/g, " ")
+   .replace(/\b\w/g, l => l.toUpperCase());
+
+const buildParams = () => {
+  const p = { type: type.value };
+  if (["weekly","monthly","quarterly","yearly"].includes(type.value)) p.year = year.value;
+  if (["weekly","monthly"].includes(type.value)) p.month = month.value;
+  if (type.value === "weekly") p.week = week.value;
+  if (type.value === "range") {
+    if (!start.value || !end.value) return null;
+    p.start = start.value;
+    p.end = end.value;
+  }
+  return p;
+};
+
+/* ================= DAY / NIGHT ================= */
+const visibleHours = computed(() =>
+  timeRange.value === "day"
+    ? raw.value.hours.slice(0, 12)
+    : raw.value.hours.slice(12, 24)
 );
 
-// USSD series
-const ussdCountSeries = computed(() =>
-  Object.keys(ussdRaw.value.series || {})
-    .filter(k => k.includes('_count') && k !== 'ussd_count')
-    .map(k => ({ name: cleanName(k), data: ussdRaw.value.series[k] || [] }))
-);
-const ussdAmountSeries = computed(() =>
-  Object.keys(ussdRaw.value.series || {})
-    .filter(k => k.includes('_sum'))
-    .map(k => ({ name: cleanName(k), data: ussdRaw.value.series[k] || [] }))
+const sliceData = (arr) =>
+  timeRange.value === "day"
+    ? arr.slice(0, 12)
+    : arr.slice(12, 24);
+
+/* ================= SERIES ================= */
+const chartSeries = computed(() =>
+  Object.keys(raw.value.series || {})
+    .filter(k => {
+      if (tab.value === "counts") {
+        if (activeChannel.value === "mobile" && k === "app_count") return false;
+        if (activeChannel.value === "ussd" && k === "ussd_count") return false;
+        return k.endsWith("_count");
+      }
+      return k.endsWith("_sum");
+    })
+    .map(k => ({
+      name: cleanName(k),
+      data:
+        type.value === "daily"
+          ? sliceData(raw.value.series[k] || [])
+          : raw.value.series[k] || [],
+    }))
 );
 
-// Daily/hourly chart options use hours from API
-const mobileCountOptions = computed(() =>
-  type.value === 'daily' ? chartOptions(mobileRaw.value.hours, 'Transaction Count', v => v.toLocaleString()) 
-                          : chartOptions(mobileRaw.value.labels, 'Transaction Count', v => v.toLocaleString())
-);
-const mobileAmountOptions = computed(() =>
-  type.value === 'daily' ? chartOptions(mobileRaw.value.hours, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString()) 
-                          : chartOptions(mobileRaw.value.labels, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString())
-);
-const ussdCountOptions = computed(() =>
-  type.value === 'daily' ? chartOptions(ussdRaw.value.hours, 'Transaction Count', v => v.toLocaleString()) 
-                          : chartOptions(ussdRaw.value.labels, 'Transaction Count', v => v.toLocaleString())
-);
-const ussdAmountOptions = computed(() =>
-  type.value === 'daily' ? chartOptions(ussdRaw.value.hours, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString()) 
-                          : chartOptions(ussdRaw.value.labels, 'Amount (ETB)', v => 'ETB ' + v.toLocaleString())
-);
+/* ================= UPDATED OPTIONS FOR NEW DESIGN ================= */
+const chartOptions = computed(() => ({
+  chart: { 
+    toolbar: { show: false },
+    fontFamily: 'Inter, sans-serif',
+    foreColor: "#64748b" 
+  },
+  colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6'],
+  plotOptions: { 
+    bar: { 
+      borderRadius: 10, 
+      columnWidth: "55%",
+      dataLabels: { position: 'top' } 
+    } 
+  },
+  dataLabels: { enabled: false },
+  legend: { 
+    position: "top", 
+    horizontalAlign: "left", 
+    fontWeight: 800, 
+    fontSize: '12px',
+    markers: { radius: 12 },
+    labels: { colors: '#334155' } 
+  },
+  xaxis: {
+    categories:
+      type.value === "daily"
+        ? visibleHours.value
+        : raw.value.labels,
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: { style: { fontWeight: 600 } }
+  },
+  yaxis: {
+    title: {
+      text: tab.value === "counts" ? "Transaction Count" : "Amount (ETB)",
+      style: { color: '#94a3b8', fontWeight: 700 }
+    },
+    labels: {
+      formatter: v =>
+        tab.value === "counts"
+          ? v.toLocaleString()
+          : "ETB " + (v >= 1000 ? (v/1000).toFixed(1) + 'K' : v),
+      style: { fontWeight: 600 }
+    },
+  },
+  grid: { borderColor: "#e2e8f0", strokeDashArray: 4 },
+  tooltip: { theme: 'light' }
+}));
 
-// Tab style
-const tabClass = (currentTab, t) => [
-  'py-3 px-1 border-b-2 font-medium text-base',
-  currentTab === t
-    ? 'border-primary text-primary'
-    : 'border-transparent text-gray-600 hover:text-primary hover:border-primary'
-];
+/* ================= API ================= */
+const loadDashboard = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+
+    const params = buildParams();
+    if (!params) {
+      error.value = "Please select valid date range";
+      return;
+    }
+
+    const url =
+      activeChannel.value === "mobile"
+        ? "/cron_local_report/app/report"
+        : "/cron_local_report/ussd/report";
+
+    const res = await api.get(url, params);
+
+    raw.value = {
+      labels: res.labels || [],
+      hours: res.hours || [],
+      series: res.series || {},
+    };
+  } catch {
+    error.value = "Failed to load dashboard data";
+  } finally {
+    loading.value = false;
+  }
+};
 
 onMounted(loadDashboard);
 </script>
@@ -284,7 +285,7 @@ onMounted(loadDashboard);
 <script>
 export default {
   components: {
-    apexchart: VueApexCharts
-  }
+    apexchart: VueApexCharts,
+  },
 };
 </script>

@@ -1,141 +1,195 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen">
+  <div class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans text-slate-900">
+    <div class="max-w-[1600px] mx-auto space-y-8">
+      
+      <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Header -->
-    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-xl shadow-md flex items-center justify-between">
-      <h1 class="text-xl font-semibold flex items-center">
-        <i class="fa-solid fa-briefcase mr-3"></i>
-        Case Management
-      </h1>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div class="flex items-center gap-4 mb-1">
+              <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-sm">
+                <i class="fa-solid fa-briefcase text-lg"></i>
+              </div>
+              <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight italic">
+                Case <span class="text-primary font-light">Management</span>
+              </h1>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] ml-14">Issue Tracking & Resolution</p>
+          </div>
 
-      <button v-if="role === 'Admin'"
-        @click="openModal"
-        class="flex items-center bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary/80 transition shadow"
-      >
-        <i class="fa-solid fa-plus mr-2"></i>
-        New Case
-      </button>
-    </div>
-
-    <!-- ================= FILTERS ================= -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 bg-white p-4 rounded-xl shadow">
-      <div>
-        <label class="text-sm font-semibold">Date Type</label>
-        <select v-model="filters.date_type" class="custom-input w-full h-10">
-          <option value="">Select</option>
-          <option value="created">Created Date</option>
-          <option value="updated">Updated Date</option>
-        </select>
+          <button
+            v-if="role === 'Admin'"
+            @click="openModal()"
+            class="group flex items-center bg-secondary text-white px-8 py-3.5 rounded-2xl hover:bg-primary transition-all shadow-xl shadow-slate-200 hover:shadow-primary/30 active:scale-95"
+          >
+            <i class="fa-solid fa-plus mr-3 group-hover:rotate-90 transition-transform text-white"></i>
+            <span class="text-xs font-black uppercase tracking-widest text-white">Create New Case</span>
+          </button>
+        </div>
       </div>
 
-      <div>
-        <label class="text-sm font-semibold">From</label>
-        <input type="date" v-model="filters.from" class="custom-input w-full h-10" />
-      </div>
+      <div class="bg-white rounded-[1.5rem] border border-slate-200 p-6 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date Type</label>
+          <select v-model="filters.date_type" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs uppercase tracking-widest">
+            <option value="">Select Type</option>
+            <option value="created">Created Date</option>
+            <option value="updated">Updated Date</option>
+          </select>
+        </div>
 
-      <div>
-        <label class="text-sm font-semibold">To</label>
-        <input type="date" v-model="filters.to" class="custom-input w-full h-10" />
-      </div>
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">From Date</label>
+          <input type="date" v-model="filters.from" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs" />
+        </div>
 
-      <div class="flex items-end">
+        <div class="space-y-2">
+          <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">To Date</label>
+          <input type="date" v-model="filters.to" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs" />
+        </div>
+
         <button
           @click="getCases"
-          class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 w-full"
+          class="h-12 bg-secondary text-white hover:bg-primary hover:text-white rounded-xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 border border-slate-200 shadow-sm"
         >
           Apply Filters
         </button>
       </div>
-    </div>
-    <!-- ========================================== -->
 
-    <!-- ================= TABLE ================= -->
-    <div v-if="cases.length" class="overflow-hidden rounded-xl border border-primary mt-6 bg-white shadow-sm">
-      <table class="min-w-full border border-primary">
-        <thead class="bg-secondary text-white">
-          <tr>
-            <th class="px-6 py-3 border">Title</th>
-            <th class="px-6 py-3 border">Type</th>
-            <th class="px-6 py-3 border">Description</th>
-            <th class="px-6 py-3 border">User</th>
-            <th class="px-6 py-3 border">Created At</th>
-            <th class="px-6 py-3 border">Updated At</th>
-            <th class="px-6 py-3 border">Status</th>
-            <th v-if="role === 'Admin'" class="px-6 py-3 border text-center">Actions</th>
-          </tr>
-        </thead>
+      <div class="rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden bg-white">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-100">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Case Details</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Assigned User</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Timeline</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Status</th>
+                <th v-if="role === 'Admin'" class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Operations</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          <tr v-for="item in cases" :key="item.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 border font-semibold">{{ item.case_title }}</td>
-            <td class="px-6 py-4 border">{{ item.case_type }}</td>
-            <td class="px-6 py-4 border">{{ item.description }}</td>
-            <td class="px-6 py-4 border">{{ item.User?.first_name }} {{ item.User?.last_name }}</td>
-            <td class="px-6 py-4 border">{{ formatDate(item.createdAt) }}</td>
-            <td class="px-6 py-4 border">{{ item.status === 'resolved' ? formatDate(item.updatedAt) : '---' }}</td>
-            <td class="px-6 py-4 border">
-              <span class="px-2 py-1 rounded-full text-white text-sm font-semibold"
-                :class="{'bg-primary': item.status === 'pending','bg-green-600': item.status === 'resolved'}">
-                {{ item.status }}
+            <tbody class="divide-y divide-slate-50">
+              <tr v-for="item in cases" :key="item.id" class="hover:bg-slate-50/80 transition-colors group">
+                <td class="px-8 py-5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary font-black text-[10px] border border-primary/10 shadow-sm">
+                      {{ item.case_type === 'ussd' ? 'USSD' : 'APP' }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-slate-700">{{ item.case_title }}</p>
+                      <p class="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">{{ item.case_type }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-8 py-5">
+                  <p class="text-xs text-slate-500 max-w-xs line-clamp-2 leading-relaxed">{{ item.description }}</p>
+                </td>
+
+                <td class="px-8 py-5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-black text-slate-400 border border-slate-200">
+                      {{ item.User?.first_name[0] }}{{ item.User?.last_name[0] }}
+                    </div>
+                    <span class="text-xs font-semibold text-slate-600">{{ item.User?.first_name }} {{ item.User?.last_name }}</span>
+                  </div>
+                </td>
+
+                <td class="px-8 py-5">
+                  <p class="text-[10px] font-bold text-slate-500 uppercase">Created: {{ formatDate(item.createdAt) }}</p>
+                  <p class="text-[10px] font-medium text-slate-400 mt-0.5 italic">Resolved: {{ item.status === 'resolved' ? formatDate(item.updatedAt) : 'N/A' }}</p>
+                </td>
+
+                <td class="px-8 py-5 text-center">
+                  <span
+                    class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border"
+                    :class="item.status === 'resolved' 
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                      : 'bg-orange-50 text-orange-600 border-orange-100'"
+                  >
+                    {{ item.status }}
+                  </span>
+                </td>
+
+                <td v-if="role === 'Admin'" class="px-8 py-5 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button @click="editCase(item)" class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                      <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    </button>
+                    <button @click="deleteCase(item.id)" class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div v-if="cases.length === 0" class="py-20 text-center">
+            <i class="fa-solid fa-folder-open text-slate-200 text-5xl mb-4"></i>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-sm">No cases found</p>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden relative p-10 text-slate-900">
+          
+          <button @click="closeModal" class="absolute right-6 top-6 text-slate-400 hover:text-red-500 transition-colors">
+            <i class="fa-solid fa-circle-xmark text-2xl"></i>
+          </button>
+
+          <div class="text-center mb-8">
+            <h2 class="text-2xl font-black text-slate-800 uppercase italic tracking-tight">
+              {{ isEditing ? 'Modify' : 'Create' }} <span class="text-primary font-light">Case</span>
+            </h2>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Fill in issue details</p>
+          </div>
+
+          <form @submit.prevent="isEditing ? updateCase() : createCase()" class="space-y-5">
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Case Type</label>
+              <select v-model="form.case_type" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs uppercase tracking-widest text-slate-700 cursor-pointer">
+                <option value="ussd">USSD Service</option>
+                <option value="mobile_app">Mobile Application</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Case Title</label>
+              <input v-model="form.case_title" type="text" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-sm text-slate-700" placeholder="e.g., USSD Login Failure" required />
+            </div>
+
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Description</label>
+              <textarea v-model="form.description" rows="3" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-sm text-slate-700 resize-none" placeholder="Detailed explanation..."></textarea>
+            </div>
+
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Resolution Status</label>
+              <select v-model="form.status" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs uppercase tracking-widest text-slate-700 cursor-pointer">
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+
+            <button 
+              type="submit"
+              class="w-full h-14 bg-secondary text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-primary transition-all shadow-xl shadow-slate-200 mt-4 flex items-center justify-center gap-3 active:scale-95 group"
+            >
+              <i :class="isEditing ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-save'" class="text-white group-hover:scale-110 transition-transform"></i>
+              <span class="text-white">
+                {{ isEditing ? 'Update Case' : 'Register Case' }}
               </span>
-            </td>
-            <td v-if="role === 'Admin'" class="px-6 py-4 border text-center space-x-2">
-              <button @click="editCase(item)" class="text-blue-500">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button @click="deleteCase(item.id)" class="text-red-500">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-else class="text-center text-gray-500 mt-12">
-      <i class="fa-solid fa-folder-open text-6xl mb-4"></i>
-      <p>No cases found</p>
-    </div>
-
-    <!-- ================= MODAL ================= -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white w-full max-w-md rounded-xl shadow-lg p-8 relative">
-        <button @click="closeModal" class="absolute right-4 top-4">✖</button>
-
-        <h2 v-if="role === 'Admin'"  class="text-xl font-bold text-center text-primary mb-4">{{ isEditing ? 'Edit Case' : 'Create Case' }}</h2>
-
-        <form @submit.prevent="isEditing ? updateCase() : createCase()">
-          <div class="mb-3">
-            <label>Case Type</label>
-            <select v-model="form.case_type" class="custom-input w-full h-12">
-              <option value="ussd">USSD</option>
-              <option value="mobile_app">Mobile App</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label>Case Title</label>
-            <input v-model="form.case_title" class="custom-input w-full h-12" />
-          </div>
-
-          <div class="mb-3">
-            <label>Description</label>
-            <textarea v-model="form.description" class="custom-input w-full"></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label>Status</label>
-            <select v-model="form.status" class="custom-input w-full h-12">
-              <option value="pending">Pending</option>
-              <option value="resolved">Resolved</option>
-            </select>
-          </div>
-
-          <button class="w-full h-12 bg-primary text-white rounded-lg">{{ isEditing ? 'Update Case' : 'Save Case' }}</button>
-        </form>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
-
+    
     <Toast ref="toast" />
   </div>
 </template>

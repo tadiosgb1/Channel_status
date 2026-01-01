@@ -1,186 +1,197 @@
 <template>
-  <div class="p-2 bg-gray-100 min-h-screen">
+  <div class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans text-slate-900">
+    <div class="max-w-[1600px] mx-auto space-y-8">
+      
+      <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
 
- <!-- Header Card -->
-    <div class="bg-primary/20 border-l-4 border-primary p-6 rounded-md shadow-md flex items-center justify-between">
-      <div>
-        <h1 class="text-lg font-semibold   flex items-center text-gray-600">
-          <i class="fa-solid fa-users mr-3 "></i>
-          User Management
-        </h1>
-      </div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div class="flex items-center gap-4 mb-1">
+               <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-sm">
+                 <i class="fa-solid fa-users-gear text-lg"></i>
+               </div>
+               <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight italic">
+                 User <span class="text-primary font-light">Management</span>
+               </h1>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] ml-14">Access Control & Identity Provider</p>
+          </div>
+
       <button
         @click="openModal()"
-        class="flex items-center bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary/80 transition shadow"
+        class="group flex items-center bg-secondary text-white px-8 py-3.5 rounded-2xl hover:bg-primary transition-all shadow-xl shadow-slate-200 hover:shadow-primary/30 active:scale-95"
       >
-        <i class="fa-solid fa-user-plus mr-2"></i>
-        Add User
+        <i class="fa-solid fa-user-plus mr-3 group-hover:rotate-12 transition-transform text-white"></i>
+        <span class="text-xs font-black uppercase tracking-widest text-white">Add New Member</span>
       </button>
-    </div>
-
-    <!-- Users Table -->
-    <div class="overflow-hidden rounded-xl border border-primary mt-6 bg-white shadow-sm">
-    <table class="min-w-full border border-primary rounded-lg overflow-hidden">
-      <thead class="bg-secondary text-white">
-        <tr class="border border-primary">
-          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">First Name</th>
-          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Last Name</th>
-          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Email</th>
-          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Username</th>
-          <th class="px-6 py-3 text-left text-sm font-medium uppercase border border-primary">Status</th>
-          <th class="px-2 py-3 text-left text-sm font-medium uppercase border border-primary">Role</th>
-          <th class="px-6 py-3 text-center text-sm font-medium uppercase border border-primary">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody class="bg-white border border-primary">
-        <tr 
-          v-for="user in users"
-          :key="user.id"
-          class="hover:bg-gray-50 transition "
-        >
-          <td class="px-6 py-4 border border-primary">{{ user.first_name }}</td>
-          <td class="px-6 py-4 border border-primary">{{ user.last_name }}</td>
-          <td class="px-6 py-4 border border-primary">{{ user.email }}</td>
-          <td class="px-6 py-4 border border-primary">{{ user.username }}</td>
-          <td class="px-2 py-4 border border-primary text-green-600 hover:text-green-800 font-semibold"  v-if="user.status === 'Active'">{{ user.status }}</td>
-          <td class="px-2 py-4 border border-primary text-orange-600 hover:text-orange-800 font-semibold"  v-else>{{ user.status }}</td>
-
-          <td class="px-6 py-4 border border-primary">
-            <span
-              class="px-1 py-1 rounded-full text-white text-sm font-semibold"
-              :class="user.role === 'Admin' ? 'bg-[#0f3c50]' : 'bg-[#0f3c50]'"
-            >
-              {{ user.role }}
-            </span>
-          </td>
-
-          <td class="px-6 py-4 text-center space-x-3 border border-primary">
-          <button @click="editUser(user)" class="text-blue-500 hover:text-blue-700">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-
-          <button @click="deleteUser(user.id)" class="text-red-500 hover:text-red-700">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-
-          <button
-          v-if="user.status === 'Active'"
-              @click="deactivateUser(user.id)"
-              class="text-orange-600 hover:text-orange-800 font-semibold"
-            >
-              <i class="fa-solid fa-user-slash mr-1"></i>
-              Block
-            </button>
-
-            <button
-              v-else
-              @click="activateUser(user.id)"
-              class="text-green-600 hover:text-green-800 font-semibold"
-            >
-              <i class="fa-solid fa-user-check mr-1"></i>
-              Unblock 
-            </button>
-        </td>
-
-
-        </tr>
-      </tbody>
-    </table>
-
-    </div>
-
-    <!-- Add/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white w-full max-w-md rounded-xl shadow-lg p-8 relative">
-
-        <!-- Close Button -->
-        <button @click="closeModal" class="absolute right-4 top-4 text-gray-500 hover:text-black">
-          ✖
-        </button>
-
-        <h2 class="text-xl font-bold text-center text-[#1f3c50] mb-4">
-          {{ isEditing ? 'Edit User' : 'Create New User' }}
-        </h2>
-
-        <form @submit.prevent="isEditing ? updateUser() : createUser()">
-          <div class="flex justify-between">
-            <div class="mb-3 w-1/2 mr-2">
-              <label class="text-sm font-semibold text-gray-700  block">First Name *</label>
-              <input
-                v-model="form.first_name"
-                type="text"
-                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-                placeholder="Enter first name"
-                required
-              />
-            </div>
-
-            <div class="mb-3 w-1/2 ml-2">
-              <label class="text-sm font-semibold text-gray-700  block">Last Name *</label>
-              <input
-                v-model="form.last_name"
-                type="text"
-                class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-                placeholder="Enter last name"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700  block  ">Email *</label>
-            <input
-              v-model="form.email"
-              type="email"
-              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-              placeholder="Enter email address"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label class="text-sm font-semibold text-gray-700  block">Username *</label>
-            <input
-              v-model="form.username"
-              type="username"
-              class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-              placeholder="Enter username "
-              required
-            />
-          </div>
-          <div class="mb-3" v-if="!isEditing">
-            <label class="text-sm font-semibold text-gray-700  block">Password *</label>
-            <input
-              v-model="form.password"
-              type="password"
-              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-              placeholder="Enter password"
-              required
-            />
-          </div>
-
-          <div class="mb-4">
-            <label class="text-sm font-semibold text-gray-700  block">Role *</label>
-            <select
-              v-model="form.role"
-              class="w-full h-12 px-4 border rounded-lg focus:ring-2 focus:ring-secondary custom-input"
-            >
-              <option value="Admin">Admin</option>
-              <option value="User">User</option>
-            </select>
-          </div>
-
-          <button
-            class="w-full h-12 bg-primary text-white font-semibold rounded-lg hover:bg-primary/80 transition"
-          >
-            <i :class="isEditing ? 'fa-solid fa-pen-to-square mr-2' : 'fa-solid fa-save mr-2'"></i>
-            {{ isEditing ? 'Update User' : 'Save User' }}
-          </button>
-
-        </form>
+        </div>
       </div>
+
+      <div class="rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-100">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Identity</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email & Username</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Privilege</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Operations</th>
+              </tr>
+            </thead>
+
+           <tbody class="divide-y divide-slate-50 bg-white">
+          <tr 
+            v-for="user in users" 
+            :key="user.id"
+            class="hover:bg-slate-50/80 transition-colors group"
+          >
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary font-black text-xs border border-primary/10 shadow-sm">
+                  {{ user.first_name[0] }}{{ user.last_name[0] }}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-slate-700">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">Registered Member</p>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-8 py-5 text-sm">
+              <p class="font-semibold text-slate-600">{{ user.email }}</p>
+              <p class="text-xs text-slate-400 font-mono">@{{ user.username }}</p>
+            </td>
+
+            <td class="px-8 py-5">
+              <span
+                class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border"
+                :class="user.role === 'Admin' 
+                  ? 'bg-indigo-50 text-indigo-600 border-indigo-100' 
+                  : 'bg-slate-50 text-slate-500 border-slate-100'"
+              >
+                {{ user.role }}
+              </span>
+            </td>
+
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span :class="user.status === 'Active' ? 'bg-emerald-500' : 'bg-orange-500'" class="w-2 h-2 rounded-full animate-pulse"></span>
+                <span :class="user.status === 'Active' ? 'text-emerald-600' : 'text-orange-600'" class="text-xs font-black uppercase tracking-widest">
+                  {{ user.status }}
+                </span>
+              </div>
+            </td>
+
+            <td class="px-8 py-5 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button @click="editUser(user)" 
+                  class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm shadow-blue-100" 
+                  title="Edit Profile">
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
+
+                <button 
+                  v-if="user.status === 'Active'" 
+                  @click="deactivateUser(user.id)" 
+                  class="w-9 h-9 flex items-center justify-center bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm shadow-orange-100" 
+                  title="Block User"
+                >
+                  <i class="fa-solid fa-user-slash text-xs"></i>
+                </button>
+                <button 
+                  v-else 
+                  @click="activateUser(user.id)" 
+                  class="w-9 h-9 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm shadow-emerald-100" 
+                  title="Unblock User"
+                >
+                  <i class="fa-solid fa-user-check text-xs"></i>
+                </button>
+
+                <button @click="deleteUser(user.id)" 
+                  class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm shadow-red-100" 
+                  title="Delete Permanent">
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+          </table>
+          <div v-if="users.length === 0 && !loading" class="py-20 text-center">
+            <i class="fa-solid fa-user-group text-slate-200 text-5xl mb-4"></i>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-sm">No members found</p>
+          </div>
+        </div>
+      </div>
+
+    <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+  
+  <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden relative p-10 text-slate-900">
+    
+    <button @click="closeModal" class="absolute right-6 top-6 text-slate-400 hover:text-red-500 transition-colors">
+      <i class="fa-solid fa-circle-xmark text-2xl"></i>
+    </button>
+
+    <div class="text-center mb-8">
+      <h2 class="text-2xl font-black text-slate-800 uppercase italic tracking-tight">
+        {{ isEditing ? 'Modify' : 'Register' }} <span class="text-primary font-light">Member</span>
+      </h2>
+      <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Fill in account credentials</p>
     </div>
 
+    <form @submit.prevent="isEditing ? updateUser() : createUser()" class="space-y-5">
+      
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">First Name</label>
+          <input v-model="form.first_name" type="text" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-slate-700" placeholder="First Name" required />
+        </div>
+        <div class="flex-1">
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Last Name</label>
+          <input v-model="form.last_name" type="text" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-slate-700" placeholder="Last Name" required />
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Email Address</label>
+        <input v-model="form.email" type="email" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-slate-700" placeholder="FullName@Wegagenbabksc.com.et" required />
+      </div>
+
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Username</label>
+        <input v-model="form.username" type="text" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-slate-700" placeholder="Username" required />
+      </div>
+
+      <div v-if="!isEditing">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Secure Password</label>
+        <input v-model="form.password" type="password" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-sm text-slate-700" placeholder="••••••••" required />
+      </div>
+
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">System Role</label>
+        <select v-model="form.role" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-xs uppercase tracking-widest text-slate-700 cursor-pointer">
+          <option value="Admin">Administrator</option>
+          <option value="User">Standard User</option>
+        </select>
+      </div>
+
+      <button 
+        type="submit"
+        class="w-full h-14 bg-secondary text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-primary transition-all shadow-xl shadow-slate-200 mt-4 flex items-center justify-center gap-3 active:scale-95 group"
+      >
+        <i :class="isEditing ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-cloud-arrow-up'" class="text-white group-hover:scale-110 transition-transform"></i>
+        <span class="text-white">
+          {{ isEditing ? 'Update Profile' : 'Complete Registration' }}
+        </span>
+      </button>
+
+    </form>
+  </div>
+</div>
+    </div>
+    
     <Toast ref="toast" />
   </div>
 </template>
@@ -190,8 +201,10 @@ import { ref, getCurrentInstance, onMounted } from "vue";
 import ApiService from "@/services/ApiService";
 import Toast from "../../components/reUsableComponents/Toast.vue";
 
+/* Logic remains exactly the same as provided */
 const showModal = ref(false);
 const isEditing = ref(false);
+const loading = ref(false);
 const { proxy } = getCurrentInstance();
 const api = new ApiService();
 const users = ref([]);
@@ -201,7 +214,7 @@ const form = ref({
   first_name: "",
   last_name: "",
   email: "",
-  username:"",
+  username: "",
   password: "",
   role: "User",
 });
@@ -213,24 +226,34 @@ const openModal = () => {
 
 const closeModal = () => {
   showModal.value = false;
-  form.value = { id: null, first_name: "", last_name: "", email: "",username:"", password: "", role: "User" };
+  form.value = { id: null, first_name: "", last_name: "", email: "", username: "", password: "", role: "User" };
 };
 
+const getAllUsers = async () => {
+  try {
+    loading.value = true;
+    const res = await api.get("/users");
+    users.value = res.data;
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const createUser = async () => {
   try {
     await api.post("/auth/register", form.value);
-    proxy.$refs.toast.showSuccessToastMessage("User created!");
+    proxy.$refs.toast.showSuccessToastMessage("User registered successfully!");
     getAllUsers();
     closeModal();
   } catch (err) {
-    console.error(err);
-    proxy.$refs.toast.showErrorToastMessage("Failed to save user");
+    proxy.$refs.toast.showErrorToastMessage("Registration failed");
   }
 };
 
 const editUser = (user) => {
-  form.value = { ...user, password: "" }; // Password is empty for editing
+  form.value = { ...user, password: "" };
   isEditing.value = true;
   showModal.value = true;
 };
@@ -238,61 +261,45 @@ const editUser = (user) => {
 const updateUser = async () => {
   try {
     await api.patch(`/users/${form.value.id}`, form.value);
-    proxy.$refs.toast.showSuccessToastMessage("User updated!");
+    proxy.$refs.toast.showSuccessToastMessage("Profile updated!");
     getAllUsers();
     closeModal();
   } catch (err) {
-    console.error(err);
-    proxy.$refs.toast.showErrorToastMessage("Failed to update user");
+    proxy.$refs.toast.showErrorToastMessage("Update failed");
   }
 };
 
 const deleteUser = async (id) => {
-  if (confirm("Are you sure you want to delete this user?")) {
+  if (confirm("Delete this member permanently?")) {
     try {
       await api.delete(`/users/${id}`);
-      proxy.$refs.toast.showSuccessToastMessage("User deleted!");
+      proxy.$refs.toast.showSuccessToastMessage("User removed");
       getAllUsers();
     } catch (err) {
-      console.error(err);
-      proxy.$refs.toast.showErrorToastMessage("Failed to delete user");
+      proxy.$refs.toast.showErrorToastMessage("Action failed");
     }
   }
 };
 
 const deactivateUser = async (id) => {
   if (!confirm("Deactivate this user?")) return;
-
   try {
     await api.patch(`/users/${id}/deactivate`);
-    proxy.$refs.toast.showSuccessToastMessage("User deactivated!");
+    proxy.$refs.toast.showSuccessToastMessage("Access Revoked");
     getAllUsers();
   } catch (err) {
-    console.error(err);
-    proxy.$refs.toast.showErrorToastMessage("Failed to deactivate user");
+    proxy.$refs.toast.showErrorToastMessage("Action failed");
   }
 };
 
 const activateUser = async (id) => {
   if (!confirm("Activate this user?")) return;
-
   try {
     await api.patch(`/users/${id}/activate`);
-    proxy.$refs.toast.showSuccessToastMessage("User activated!");
+    proxy.$refs.toast.showSuccessToastMessage("Access Granted");
     getAllUsers();
   } catch (err) {
-    console.error(err);
-    proxy.$refs.toast.showErrorToastMessage("Failed to activate user");
-  }
-};
-
-
-const getAllUsers = async () => {
-  try {
-    const res = await api.get("/users");
-    users.value = res.data;
-  } catch (err) {
-    console.error("Error fetching users:", err);
+    proxy.$refs.toast.showErrorToastMessage("Action failed");
   }
 };
 
@@ -300,3 +307,10 @@ onMounted(() => {
   getAllUsers();
 });
 </script>
+
+<style scoped>
+/* Smooth fade for the action buttons */
+.divide-y tr:hover .group-hover\:opacity-100 {
+  transition-delay: 50ms;
+}
+</style>
